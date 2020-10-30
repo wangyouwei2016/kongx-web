@@ -11,7 +11,7 @@
         "test:e2e": "vue-cli-service test:e2e"
     },
     "dependencies": {
-        "@smallwei/avue": "^2.4.1",
+        "@smallwei/avue": "^2.6.18",
         "avue-plugin-transfer": "^0.0.2",
         "avue-plugin-ueditor": "^0.0.1",
         "axios": "^0.18.0",

@@ -1,11 +1,20 @@
 <template>
   <div>
     <avue-form
-      :option="formColumns"
+      :option="consumersColumn"
       v-model="upholdEntity"
       ref="form"
       @submit="handleEntity"
     >
+      <template slot="snis">
+        <item-tags
+          :tags="upholdEntity.snis"
+          @sendTag="bindTags"
+          name="snis"
+          column="snis"
+          :mode="mode"
+        ></item-tags>
+      </template>
       <template slot="tags">
         <item-tags
           :tags="upholdEntity.tags"
@@ -24,19 +33,23 @@
   </div>
 </template>
 <script>
-import { consumersColumn } from "@/const/table/gatewayOption";
-import { consumerSave, consumerUpdate } from "@/api/gateway/consumer";
+import { mapGetters } from "vuex";
+import { get_columns } from "@/const/table/gatewayColumnOption";
+import { DIC } from "@/const/dic";
+import { entitySave, entityUpdate } from "@/api/gateway/ca_certificates";
 import ItemTags from "@/components/ItemTags";
 export default {
-  name: "Route",
+  name: DIC.CACERTIFICATES + "_uphold",
   components: { ItemTags },
   data() {
     return {
-      formColumns: consumersColumn,
+      consumersColumn: [],
       upholdEntity: this.entity,
-      db_type: "",
-      charsets: [],
+      entityName: DIC.CACERTIFICATES,
     };
+  },
+  computed: {
+    ...mapGetters(["permission", "systemProfile", "kongClient"]),
   },
   props: {
     entity: { type: Object, required: false },
@@ -45,16 +58,21 @@ export default {
     },
   },
   created() {
-    this.initOptions();
     this.init();
   },
   methods: {
-    init() {},
+    init() {
+      this.consumersColumn = get_columns(
+        this.kongClient.version,
+        this.entityName
+      );
+      this.initOptions();
+    },
     bindTags(data) {
       this.upholdEntity = Object.assign(this.upholdEntity, data);
     },
     initOptions() {
-      this.formColumns.column.forEach((column) => {
+      this.consumersColumn.column.forEach((column) => {
         column["disabled"] = this.mode == "view";
       });
     },
@@ -70,7 +88,7 @@ export default {
       }
     },
     handleEntityUpdate(row, done) {
-      consumerUpdate(this.upholdEntity)
+      entityUpdate(this.upholdEntity)
         .then((res) => {
           let _data = res.data;
           if (_data.status != 0) {
@@ -88,7 +106,7 @@ export default {
     },
 
     handleEntitySave(row, done) {
-      consumerSave(this.upholdEntity)
+      entitySave(this.upholdEntity)
         .then((res) => {
           let _data = res.data;
           if (_data.status != 0) {

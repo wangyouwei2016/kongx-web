@@ -11,19 +11,19 @@
       </div>
     </basic-container>
     <basic-container>
-      <div v-if="pathKey === entityName">
+      <div v-if="pathKey == entityName">
         <search-banner
           ref="routeSearch"
-          :span="permission.upstream_add || isDevProfile ? 21 : 24"
-          placeholder="请输入upstream名称"
+          placeholder="请输入Name、Tags"
           :handleList="handleList"
+          :span="isDevProfile ? 21 : 24"
           :searchProps="searchProps"
           :page="page"
           @search-change="searchChange"
         >
           <template slot="menu">
             <el-button
-              v-if="permission.upstream_add || isDevProfile"
+              v-if="isDevProfile"
               icon="el-icon-plus"
               size="small"
               @click="handleGrade({})"
@@ -48,19 +48,6 @@
           <template slot="id" slot-scope="{ row }">
             <copy-item :value="row.id"></copy-item>
           </template>
-          <template slot="expand" slot-scope="{ row }">
-            <el-form label-width="80px" style="margin-left: 10px">
-              <el-form-item label="代理列表">
-                <targets :upstream="row" ref="targets" mode="view"></targets>
-              </el-form-item>
-            </el-form>
-          </template>
-
-          <template slot="name" slot-scope="{ row }">
-            <el-link :underline="false" type="success" @click="toDetail(row)">{{
-              row.name
-            }}</el-link>
-          </template>
           <template slot-scope="{ row }" slot="created_at">
             {{ new Date(row.created_at * 1000) | dateFormat }}
           </template>
@@ -80,50 +67,47 @@
               >
             </h3></template
           >
+          <template slot="username" slot-scope="{ row }">
+            <el-link :underline="false" type="success" @click="toDetail(row)">{{
+              row.username
+            }}</el-link>
+          </template>
+          <template slot="tags" slot-scope="{ row }">
+            <item-tags
+              :tags="row.tags"
+              @sendTag="bindTags"
+              name="tags"
+              column="tags"
+              mode="view"
+            ></item-tags>
+          </template>
           <template slot-scope="scope" slot="menu">
             <el-button
-              v-if="permission.upstream_update || isDevProfile"
+              v-if="isDevProfile"
               icon="el-icon-edit"
               size="small"
-              type="text"
               @click="handleGrade(scope.row, scope.$index)"
+              type="text"
               >编辑</el-button
             >
             <el-button
-              v-if="
-                !permission.upstream_update && !isDevProfile && !isProdProfile
-              "
-              icon="el-icon-edit"
-              size="small"
-              @click="handleTargetsGrade(scope.row, scope.$index)"
-              type="text"
-              >配置Targets</el-button
-            >
-            <el-button
-              v-if="permission.upstream_delete || isDevProfile"
+              v-if="isDevProfile"
               icon="el-icon-delete"
-              @click="handleDel(scope.row, scope.$index)"
               size="small"
+              @click="handleDel(scope.row, scope.$index)"
               type="text"
               >删除</el-button
             >
           </template>
         </avue-crud>
       </div>
-      <div v-if="pathKey === entityName + '_' + mode">
-        <uphold-upstream
-          :upstream="form"
-          @callback="callback"
-          :mode="mode"
-        ></uphold-upstream>
-      </div>
 
-      <div v-if="pathKey === entityName + '_edit_targets'">
-        <uphold-targets
-          :upstream="form"
-          @callback="callback"
+      <div v-if="pathKey == entityName + '_' + mode">
+        <uphold-sni
+          :entity="form"
           :mode="mode"
-        ></uphold-targets>
+          @callback="callback"
+        ></uphold-sni>
       </div>
     </basic-container>
   </div>
@@ -131,64 +115,56 @@
 <script>
 import { get_options } from "@/const/table/gatewayOption";
 import { mapGetters } from "vuex";
-import { DIC } from "@/const/dic";
-import targets from "./targets";
-import healthCheck from "./activeHealthCheck";
-import upholdUpstream from "./upholdUpstream";
-import upholdTargets from "./upholdTargets";
+import { DIC } from "@/const/dic.js";
+import upholdSni from "./uphold-sni";
 import searchBanner from "@/components/searchBanner";
+import { findAllEntities, entityRemove } from "@/api/gateway/sni";
+import ItemTags from "@/components/ItemTags";
 import InnerBreadcrumb from "@/components/InnerBreadcrumb";
 import CopyItem from "@/components/CopyItem";
-import { findAll, upstreamDel } from "@/api/gateway/upstream";
 export default {
+  name: DIC.SNIS + "_list",
   components: {
-    targets,
+    ItemTags,
     searchBanner,
-    InnerBreadcrumb,
+    upholdSni,
     CopyItem,
-    healthCheck,
-    upholdUpstream,
-    upholdTargets,
+    InnerBreadcrumb,
   },
-  name: DIC.UPSTREAMS,
   data() {
     return {
       tableSearch: {},
       tableOption: [], //表格设置属性
-      searchProps: [{ name: "name" }],
-      form: {},
+      searchProps: [{ name: "name" }, { name: "tags", type: "array" }],
       tableData: [], //表格的数据
       tablePage: 1,
       tableSize: 10,
       tableLoading: false,
+      form: {},
       page: {
         total: 0, //总页数
         currentPage: 1, //当前页数
         pageSize: 10, //每页显示多少条
       },
       mode: "add",
-      pathKey: DIC.UPSTREAMS,
-      entityName: DIC.UPSTREAMS,
+      entityName: DIC.SNIS,
+      pathKey: DIC.SNIS,
       labelArgs: {},
       path: {
-        label: DIC.UPSTREAMS,
-        key: DIC.UPSTREAMS,
+        label: DIC.SNIS,
+        key: DIC.SNIS,
         children: [
           {
-            key: DIC.UPSTREAMS + "_add",
-            label: "新建" + DIC.UPSTREAMS,
+            key: DIC.SNIS + "_add",
+            label: "新建" + DIC.SNIS,
           },
           {
-            key: DIC.UPSTREAMS + "_edit",
-            label: "修改" + DIC.UPSTREAMS,
+            key: DIC.SNIS + "_edit",
+            label: "修改" + DIC.SNIS,
           },
           {
-            key: DIC.UPSTREAMS + "_view",
-            label: "查看" + DIC.UPSTREAMS,
-          },
-          {
-            key: DIC.UPSTREAMS + "_edit_targets",
-            label: "配置Targets",
+            key: DIC.SNIS + "_view",
+            label: "查看" + DIC.SNIS,
           },
         ],
       },
@@ -202,7 +178,6 @@ export default {
       "systemProfile",
     ]),
   },
-  props: {},
   created() {
     if (this.systemProfile.id == -1) {
       this.$nextTick((_) => {
@@ -218,10 +193,10 @@ export default {
   },
   methods: {
     initOptions() {
-      if (this.isDevProfile || !this.isProdProfile) {
+      if (this.isDevProfile) {
         this.tableOption["menu"] = true;
       } else {
-        if (!this.permission.upstream_update) {
+        if (!this.permission.service_update) {
           this.tableOption["menu"] = false;
         }
       }
@@ -231,32 +206,22 @@ export default {
       this.mode = "view";
       this.pathKey = this.entityName + "_" + this.mode;
     },
+    callback(service) {
+      this.form = service;
+      this.mode = "edit";
+      this.pathKey = this.entityName + "_" + this.mode;
+      this.reloadDataList();
+    },
     handleGrade(form, index) {
       if (form && form.id) {
         this.form = form;
         this.mode = "edit";
         this.pathKey = this.entityName + "_" + this.mode;
       } else {
-        this.form = {};
+        this.form = { certificate: { id: "" } };
         this.mode = "add";
         this.pathKey = this.entityName + "_" + this.mode;
       }
-    },
-    handleTargetsGrade(form, index) {
-      if (form && form.id) {
-        this.form = form;
-        this.mode = "edit";
-        this.pathKey = this.entityName + "_edit_targets";
-      } else {
-        this.form = {};
-        this.mode = "add";
-        this.pathKey = this.entityName + "_edit_targets";
-      }
-    },
-    callback(upstream) {
-      this.form = upstream;
-      this.mode = "edit";
-      this.reloadDataList();
     },
 
     /**
@@ -283,15 +248,15 @@ export default {
      **/
     handleList(form) {
       this.tableLoading = true;
-      return findAll(Object.assign({}, form)).then((res) => {
+      return findAllEntities(Object.assign({}, form)).then((res) => {
         let data = res.data;
         this.tableLoading = false;
         return data.data || [];
       });
     },
     refreshTableList(refresh) {
-      // this.initPage(refresh);
-      // this.$refs.routeSearch.refresh(this.page, refresh);
+      this.initPage(refresh);
+      this.$refs.routeSearch.refresh(this.page, refresh);
     },
     initPage(refresh) {
       if (!!!refresh) this.tablePage = 1;
@@ -308,20 +273,6 @@ export default {
         this.initPage(false);
         this.$refs.routeSearch.loadData();
       }
-    },
-    /**
-     * @title 数据添加
-     * @param row 为当前的数据
-     * @param done 为表单关闭函数
-     *
-     **/
-    handleSave(row, done) {
-      upstreamSave(row).then((res) => {
-        done();
-        // this.grade.box = false;
-        this.form = res.data;
-        this.reloadDataList();
-      });
     },
     /**
      * @title 单点行选择行数据
@@ -349,7 +300,7 @@ export default {
         type: "warning",
       })
         .then(() => {
-          upstreamDel({ id: row.id }).then((res) => {
+          entityRemove({ id: row.id }).then((res) => {
             let _data = res.data;
             if (_data.status != 0) {
               this.$errorInfo(_data.errmsg);

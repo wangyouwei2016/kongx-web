@@ -1,13 +1,13 @@
 <template>
     <!-- 页面内部使用的面包屑组件（URL不变,不适用router跳转） -->
     <div class="inner-breadcrumb" v-show="showInRoot || value!=root" style="height:1px;padding:0 12px 10px;">
+        <el-button v-if="showBack&&pathArr.length>1" style="float:right;padding:0;" type="text" @click="back">返回上一级</el-button>
         <el-breadcrumb class="breadcrumb" separator="/" style="float:left;">
             <el-breadcrumb-item v-for="(node, index) in pathArr" :key="index">
                 <span v-if="node.disable && index<pathArr.length-1" class="disable" :class="{'last':index==pathArr.length-1}">{{parse(node.label)}}</span>
                 <a v-else :class="{'last':index==pathArr.length-1}" href="javascript:;" @click="change(node.key,node.disable)">{{parse(node.label)}}</a>
             </el-breadcrumb-item>
         </el-breadcrumb>
-        <el-button v-if="showBack&&pathArr.length>1" style="float:right;padding:0;" type="text" @click="back">返回上一级</el-button>
     </div>
 </template>
 <script>

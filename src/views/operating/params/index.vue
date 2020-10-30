@@ -19,21 +19,23 @@
                 v-if="permission.params_add"
                 icon="el-icon-plus"
                 size="small"
-                @click="toEditClient(scope.row,scope.$index)"
+                @click="toEditClient(scope.row, scope.$index)"
                 type="primary"
-              >新 增</el-button>
+                >新 增</el-button
+              >
             </template>
             <template slot-scope="scope" slot="menu">
               <el-button
                 v-if="permission.params_update"
                 icon="el-icon-edit"
                 size="small"
-                @click="toEditClient(scope.row,scope.$index)"
+                @click="toEditClient(scope.row, scope.$index)"
                 type="primary"
                 plain
-              >编辑</el-button>
+                >编辑</el-button
+              >
             </template>
-            <template slot="expand" slot-scope="{row}">
+            <template slot="expand" slot-scope="{ row }">
               <json-viewer :value="row.configValue"></json-viewer>
             </template>
           </avue-crud>
@@ -41,7 +43,7 @@
         <el-tab-pane :index="env.label" v-for="env in configTypes" :key="env">
           <span slot="label">
             <i class="icon-canshu"></i>
-            {{env.label}}
+            {{ env.label }}
           </span>
           <avue-crud
             :option="tableOption"
@@ -55,29 +57,47 @@
                 v-if="permission.params_add"
                 icon="el-icon-plus"
                 size="small"
-                @click="toEditClient(scope.row,scope.$index)"
+                @click="toEditClient(scope.row, scope.$index)"
                 type="primary"
-              >新 增</el-button>
+                >新 增</el-button
+              >
             </template>
             <template slot-scope="scope" slot="menu">
               <el-button
                 v-if="permission.params_update"
                 icon="el-icon-edit"
                 size="small"
-                @click="toEditClient(scope.row,scope.$index)"
+                @click="toEditClient(scope.row, scope.$index)"
                 type="primary"
                 plain
-              >编辑</el-button>
+                >编辑</el-button
+              >
             </template>
-            <template slot="expand" slot-scope="{row}">
-              <json-viewer :value="row.configValue"></json-viewer>
+            <template slot="expand" slot-scope="{ row }">
+              <json-viewer :value="row.configValue" v-if="row.configType != 'kongschemas'"></json-viewer>
+              <json-viewer
+                :value="JSON.parse(row.configValue)"
+                :expand-depth="5"
+                copyable
+                sort
+                v-if="row.configType == 'kongschemas'"
+              ></json-viewer>
             </template>
           </avue-crud>
         </el-tab-pane>
       </el-tabs>
     </basic-container>
-    <el-dialog title="系统参数" width="70%" :visible.sync="grade.box" v-if="grade.box">
-      <avue-form :option="configColumn" v-model="clientForm" @submit="handleClient"></avue-form>
+    <el-dialog
+      title="系统参数"
+      width="70%"
+      :visible.sync="grade.box"
+      v-if="grade.box"
+    >
+      <avue-form
+        :option="configColumn"
+        v-model="clientForm"
+        @submit="handleClient"
+      ></avue-form>
     </el-dialog>
   </div>
 </template>
@@ -87,7 +107,7 @@ import {
   findAll,
   addServerConfig,
   updateServerConfig,
-  findConfigTypes
+  findConfigTypes,
 } from "@/api/operating/serverConfig";
 import { configOption, configColumn } from "@/const/table/operatingOption.js";
 export default {
@@ -102,8 +122,8 @@ export default {
       clientForm: {},
       configTypes: [],
       grade: {
-        box: false
-      }
+        box: false,
+      },
     };
   },
   created() {
@@ -113,7 +133,7 @@ export default {
   },
   mounted() {},
   computed: {
-    ...mapGetters(["permission"])
+    ...mapGetters(["permission"]),
   },
   methods: {
     initOptions() {
@@ -122,16 +142,16 @@ export default {
       }
     },
     findConfigType() {
-      findConfigTypes().then(res => {
+      findConfigTypes().then((res) => {
         const data = res.data;
         this.configTypes = data;
         this.initConfigData();
       });
     },
     initConfigData() {
-      _.forEach(this.configTypes, type => {
+      _.forEach(this.configTypes, (type) => {
         let _datas = [];
-        _.forEach(this.tableData, item => {
+        _.forEach(this.tableData, (item) => {
           if (item.configType == type.value) {
             _datas.push(item);
           }
@@ -157,7 +177,7 @@ export default {
      **/
     handleList(form) {
       this.tableLoading = true;
-      findAll(Object.assign({})).then(res => {
+      findAll(Object.assign({})).then((res) => {
         const data = res.data;
         this.tableData = data.data;
         this.tableLoading = false;
@@ -166,7 +186,7 @@ export default {
     },
     handleClient(row, done) {
       if (this.clientForm && this.clientForm.id) {
-        updateServerConfig(this.clientForm).then(res => {
+        updateServerConfig(this.clientForm).then((res) => {
           const _data = res.data;
           if (_data.status == 0) {
             this.$successInfo("修改成功");
@@ -178,7 +198,7 @@ export default {
           done();
         });
       } else {
-        addServerConfig(this.clientForm).then(res => {
+        addServerConfig(this.clientForm).then((res) => {
           const _data = res.data;
           if (_data.status == 0) {
             this.$successInfo("新增成功");
@@ -190,7 +210,7 @@ export default {
           done();
         });
       }
-    }
-  }
+    },
+  },
 };
 </script>

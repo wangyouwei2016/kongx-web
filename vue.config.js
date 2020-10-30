@@ -40,7 +40,7 @@ module.exports = {
                 target: 'http://localhost:8095/',
                 ws: false,
                 pathRewrite: {
-                    '^/kongx': '/kongx'
+                    '^/kongx': '/'
                 }
             },
         }

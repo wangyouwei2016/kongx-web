@@ -11,7 +11,7 @@
                   type="info"
                   show-icon
                   effect="dark"
-                  description="控制台方便查看网关运行的访问日志，可查询日志：access.log,error.log,kong.jlog等"
+                  description="控制台方便查看网关运行的访问日志，可查询日志：access.log,error.log等"
                 ></el-alert>
               </el-col>
             </el-row>

@@ -1,24 +1,25 @@
 <template>
   <span class="setting">
-    <div class="setting__shade"
-         :class="{'setting__shade--show':isShade}"
-         @click="close"></div>
-    <i class="el-icon-more setting__icon"
-       @click="open"></i>
-    <div class="setting__content"
-         :class="{'setting__content--show':box}">
-<!--      <div class="setting__header">版权信息</div>-->
-<!--      <div class="setting__body setting__about">-->
-<!--        <p>基于框架：avue v2.x</p>-->
-<!--        -->
-<!--      </div>-->
-      <div class="setting__header">设置
-        <small>(滑动鼠标下面还有更多设置)</small>
+    <div
+      class="setting__shade"
+      :class="{ 'setting__shade--show': isShade }"
+      @click="close"
+    ></div>
+    <i class="el-icon-more setting__icon" @click="open"></i>
+    <div class="setting__content" :class="{ 'setting__content--show': box }">
+      <div class="setting__header">版权信息(v1.3.x)</div>
+      <div class="setting__body setting__about">
+        <p>支持Kong版本1.2.x到2.1.x</p>
       </div>
-      <el-scrollbar style="height:500px">
+      <div class="setting__header">友情赞助</div>
+      <div class="setting__body setting__about">
+        <p>觉得kongx不错，可以请作者喝杯咖啡哦！</p>
+        <img src="/img/wechat.jpg" width="150px;" />
+      </div>
+      <div class="setting__header">系统设置</div>
+      <el-scrollbar style="height: 500px">
         <div class="setting__body setting__form">
-          <avue-form v-model="form"
-                     :option="option"></avue-form>
+          <avue-form v-model="form" :option="option"></avue-form>
         </div>
       </el-scrollbar>
     </div>
@@ -26,59 +27,61 @@
 </template>
 
 <script>
-import { mapState, mapGetters } from 'vuex'
-import { validatenull } from '@/util/validate'
-import { option, list } from '@/const/setting/'
+import { mapState, mapGetters } from "vuex";
+import { validatenull } from "@/util/validate";
+import { option, list } from "@/const/setting/";
 export default {
-  data () {
+  data() {
     return {
       box: false,
       form: {},
       list: list,
-      option: option(this)
-    }
+      option: option(this),
+    };
   },
   computed: {
-    ...mapGetters(['isShade']),
+    ...mapGetters(["isShade"]),
     ...mapState({
-      showTag: state => state.common.showTag,
-      showDebug: state => state.common.showDebug,
-      showLock: state => state.common.showLock,
-      showColor: state => state.common.showColor,
-      showFullScren: state => state.common.showFullScren,
-      showCollapse: state => state.common.showCollapse,
-      showSearch: state => state.common.showSearch,
-      showMenu: state => state.common.showMenu,
-      showTheme: state => state.common.showTheme
-    })
+      showTag: (state) => state.common.showTag,
+      showDebug: (state) => state.common.showDebug,
+      showLock: (state) => state.common.showLock,
+      showColor: (state) => state.common.showColor,
+      showFullScren: (state) => state.common.showFullScren,
+      showCollapse: (state) => state.common.showCollapse,
+      showSearch: (state) => state.common.showSearch,
+      showMenu: (state) => state.common.showMenu,
+      showTheme: (state) => state.common.showTheme,
+    }),
   },
-  created () {
+  created() {
     this.init();
   },
   methods: {
-    close () {
+    close() {
       this.box = false;
-      this.$store.commit('SET_SHADE', false);
+      this.$store.commit("SET_SHADE", false);
     },
-    set (key) {
+    set(key) {
       const ele = this.find(key);
       this.$store.commit(ele.commit, eval(this.form[ele.key]));
     },
-    find (key) {
-      return this.list.filter(ele => ele.key === key)[0]
+    find(key) {
+      return this.list.filter((ele) => ele.key === key)[0];
     },
-    init () {
-      this.list.forEach(ele => {
-        this.form[ele.key] = validatenull(this[ele.key]) ? 'true' : this[ele.key] + '';
+    init() {
+      this.list.forEach((ele) => {
+        this.form[ele.key] = validatenull(this[ele.key])
+          ? "true"
+          : this[ele.key] + "";
         this.set(ele.key);
-      })
+      });
     },
-    open () {
+    open() {
       this.box = true;
-      this.$store.commit('SET_SHADE', true);
-    }
-  }
-}
+      this.$store.commit("SET_SHADE", true);
+    },
+  },
+};
 </script>
 
 <style lang="scss" scoped>

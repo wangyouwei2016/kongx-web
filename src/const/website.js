@@ -3,7 +3,7 @@
  */
 export default {
     title: "KONGX",
-    path: '',
+    path: '/kongx',
     logo: "K",
     indexTitle: 'KONGX',
     lockPage: '/lock',

@@ -20,6 +20,11 @@ export const findAllByService = (row) => request({
     method: 'get'
 });
 
+export const findAllByCustomer = (row) => request({
+    url: PREFIX + '/consumers/' + row.consumer.id + '/plugins',
+    method: 'get'
+});
+
 export const findPluginSchema = (name) => request({
     url: PREFIX + '/plugins/schema/' + name,
     method: 'get'

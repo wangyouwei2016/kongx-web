@@ -1,180 +1,172 @@
 <template>
   <div>
+    <basic-container v-if="pathKey != entityName">
+      <div>
+        <inner-breadcrumb
+          v-model="pathKey"
+          showBack="true"
+          :path="path"
+          :labelArgs="labelArgs"
+        ></inner-breadcrumb>
+      </div>
+    </basic-container>
     <basic-container>
-      <search-banner
-        ref="routeSearch"
-        placeholder="请输入Name、Upstream Name或Host"
-        :handleList="handleList"
-        :span="permission.service_add || isDevProfile ? 20 : 24"
-        :searchProps="searchProps"
-        :page="page"
-        @search-change="searchChange"
-      >
-        <template slot="menu">
-          <el-button
-            v-if="permission.service_add || isDevProfile"
-            icon="el-icon-plus"
-            size="small"
-            @click="handleGrade({})"
-            type="primary"
-            >新增</el-button
-          >
-          <el-button
-            v-if="permission.service_sync"
-            icon="el-icon-refresh"
-            size="small"
-            @click="handlerSyncBox"
-            type="success"
-            >同步Services</el-button
-          >
-        </template>
-      </search-banner>
-      <avue-crud
-        :option="tableOption"
-        :data="tableData"
-        :table-loading="tableLoading"
-        :page="page"
-        @row-click="handleRowClick"
-        @row-save="handleSave"
-        @row-del="handleDel"
-        @refresh-change="handlerefreshChange"
-        @current-change="handleCurrentChange"
-        @size-change="handleCurrentSize"
-        @search-change="handleSearchChange"
-      >
-        <template slot="expand" slot-scope="{ row }">
-          <el-form
-            label-width="80px"
-            label-position="top"
-            style="margin-left: 10px"
-          >
-            <el-form-item label="代理列表">
-              <targets mode="view" :upstream="{ id: row.host }"></targets>
-            </el-form-item>
-            <el-form-item label="路由列表">
-              <query-routes :service="row" mode="view"></query-routes>
-            </el-form-item>
-            <el-form-item label="插件列表">
-              <service-plugins :service="row"></service-plugins>
-            </el-form-item>
-          </el-form>
-        </template>
-        <template slot="name" slot-scope="{ row }">
-          <el-link :underline="false" type="success" @click="toDetail(row)">{{
-            row.name
-          }}</el-link>
-        </template>
-        <template slot-scope="scope" slot="menu">
-          <el-button
-            v-if="permission.service_update || isDevProfile"
-            icon="el-icon-edit"
-            size="small"
-            @click="handleGrade(scope.row, scope.$index)"
-            type="text"
-            >编辑</el-button
-          >
-          <el-button
-            v-if="permission.service_delete || isDevProfile"
-            icon="el-icon-delete"
-            size="small"
-            @click="handleDel(scope.row, scope.$index)"
-            type="text"
-            >删除</el-button
-          >
-        </template>
-      </avue-crud>
-      <el-drawer
-        title="服务管理"
-        size="50%"
-        :visible.sync="grade.box"
-        v-if="grade.box"
-      >
-        <div
-          style="
-            margin-left: 10px;
-            overflow-y: auto;
-            overflow-x: auto;
-            height: 90%;
-          "
+      <div v-if="pathKey === entityName">
+        <search-banner
+          ref="routeSearch"
+          placeholder="请输入服务名称或Host"
+          :handleList="handleList"
+          :span="permission.service_add || isDevProfile ? 19 : 24"
+          :searchProps="searchProps"
+          :page="page"
+          @search-change="searchChange"
         >
-          <upload-service
-            :service="form"
-            :mode="mode"
-            @callback="callback"
-          ></upload-service>
-        </div>
-      </el-drawer>
-      <el-drawer
-        size="100%"
-        :title="同步服务配置"
-        :visible.sync="grade.syncBox"
-        v-if="grade.syncBox"
-        :direction="direction"
-        :before-close="handleClose"
-      >
-        <div
-          style="
-            margin-left: 10px;
-            overflow-y: auto;
-            overflow-x: auto;
-            height: 90%;
-          "
+          <template slot="menu">
+            <el-button
+              v-if="permission.service_add || isDevProfile"
+              icon="el-icon-plus"
+              size="small"
+              @click="handleGrade({})"
+              type="primary"
+              >新增{{ entityName }}</el-button
+            >
+            <el-button
+              v-if="permission.service_sync"
+              icon="el-icon-refresh"
+              size="small"
+              @click="handlerSyncBox"
+              type="primary"
+              >同步{{ entityName }}</el-button
+            >
+          </template>
+        </search-banner>
+        <avue-crud
+          :option="tableOption"
+          :data="tableData"
+          :table-loading="tableLoading"
+          :page="page"
+          @row-click="handleRowClick"
+          @row-save="handleSave"
+          @row-del="handleDel"
+          @refresh-change="handlerefreshChange"
+          @current-change="handleCurrentChange"
+          @size-change="handleCurrentSize"
+          @search-change="handleSearchChange"
         >
-          <sync-service></sync-service>
-        </div>
-      </el-drawer>
-      <el-drawer
-        size="100%"
-        :title="'\'' + form.name + '\' 详情'"
-        :visible.sync="grade.drawerDetail"
-        v-if="grade.drawerDetail"
-        :direction="direction"
-        :before-close="handleClose"
-      >
-        <div
-          style="
-            margin-left: 10px;
-            overflow-y: auto;
-            overflow-x: auto;
-            width: 100%;
-            height: 90%;
-          "
-        >
-          <upload-service
-            :service="form"
-            :mode="mode"
-            @callback="callback"
-          ></upload-service>
-        </div>
-      </el-drawer>
+          <template slot="id" slot-scope="{ row }">
+            <copy-item :value="row.id"></copy-item>
+          </template>
+          <template slot-scope="{ row }" slot="created_at">
+            {{ new Date(row.created_at * 1000) | dateFormat }}
+          </template>
+          <template slot="expand" slot-scope="{ row }">
+            <el-form
+              label-width="80px"
+              label-position="top"
+              style="margin-left: 10px"
+            >
+              <el-form-item label="代理列表">
+                <targets mode="view" :upstream="{ id: row.host }"></targets>
+              </el-form-item>
+              <el-form-item label="路由列表">
+                <query-routes :service="row" mode="view"></query-routes>
+              </el-form-item>
+              <el-form-item label="插件列表">
+                <service-plugins :service="row"></service-plugins>
+              </el-form-item>
+            </el-form>
+          </template>
+          <template slot="empty">
+            <div class="avue-empty__image" style="height: 50px">
+              <img
+                src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNDEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMCAxKSIgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj4KICAgIDxlbGxpcHNlIGZpbGw9IiNGNUY1RjUiIGN4PSIzMiIgY3k9IjMzIiByeD0iMzIiIHJ5PSI3Ii8+CiAgICA8ZyBmaWxsLXJ1bGU9Im5vbnplcm8iIHN0cm9rZT0iI0Q5RDlEOSI+CiAgICAgIDxwYXRoIGQ9Ik01NSAxMi43Nkw0NC44NTQgMS4yNThDNDQuMzY3LjQ3NCA0My42NTYgMCA0Mi45MDcgMEgyMS4wOTNjLS43NDkgMC0xLjQ2LjQ3NC0xLjk0NyAxLjI1N0w5IDEyLjc2MVYyMmg0NnYtOS4yNHoiLz4KICAgICAgPHBhdGggZD0iTTQxLjYxMyAxNS45MzFjMC0xLjYwNS45OTQtMi45MyAyLjIyNy0yLjkzMUg1NXYxOC4xMzdDNTUgMzMuMjYgNTMuNjggMzUgNTIuMDUgMzVoLTQwLjFDMTAuMzIgMzUgOSAzMy4yNTkgOSAzMS4xMzdWMTNoMTEuMTZjMS4yMzMgMCAyLjIyNyAxLjMyMyAyLjIyNyAyLjkyOHYuMDIyYzAgMS42MDUgMS4wMDUgMi45MDEgMi4yMzcgMi45MDFoMTQuNzUyYzEuMjMyIDAgMi4yMzctMS4zMDggMi4yMzctMi45MTN2LS4wMDd6IiBmaWxsPSIjRkFGQUZBIi8+CiAgICA8L2c+CiAgPC9nPgo8L3N2Zz4K"
+                alt=""
+              />
+            </div>
+            <h3>
+              <el-button
+                icon="el-icon-plus"
+                type="text"
+                @click="handleGrade({})"
+                ><strong>新增{{ entityName }}</strong></el-button
+              >
+            </h3></template
+          >
+          <template slot="name" slot-scope="{ row }">
+            <el-link :underline="false" type="success" @click="toDetail(row)">{{
+              row.name
+            }}</el-link>
+          </template>
+          <template slot-scope="scope" slot="menu">
+            <el-button
+              v-if="permission.service_update || isDevProfile"
+              icon="el-icon-edit"
+              size="small"
+              @click="handleGrade(scope.row, scope.$index)"
+              type="text"
+              >编辑</el-button
+            >
+            <el-button
+              v-if="permission.service_delete || isDevProfile"
+              icon="el-icon-delete"
+              size="small"
+              @click="handleDel(scope.row, scope.$index)"
+              type="text"
+              >删除</el-button
+            >
+          </template>
+        </avue-crud>
+      </div>
+      <!-- <div v-if="pathKey === 'services_add' || pathKey === 'services_edit'">
+        <upload-service
+          :service="form"
+          :mode="mode"
+          @callback="callback"
+        ></upload-service>
+      </div> -->
+      <div v-if="pathKey === entityName + '_sync'">
+        <sync-service></sync-service>
+      </div>
+      <div v-if="pathKey === entityName + '_' + mode">
+        <upload-service
+          :service="form"
+          :mode="mode"
+          @callback="callback"
+        ></upload-service>
+      </div>
     </basic-container>
   </div>
 </template>
 <script>
-import { serviceOption, serviceColumn } from "@/const/table/gatewayOption";
+import { get_options } from "@/const/table/gatewayOption";
 import { mapGetters } from "vuex";
+import { DIC } from "@/const/dic.js";
 import syncService from "./syncService";
 import uploadService from "./uploadService";
 import servicePlugins from "./servicePlugins";
 import searchBanner from "@/components/searchBanner";
 import queryRoutes from "@/views/gateway/routing/queryRoutes";
 import targets from "@/views/gateway/upstream/targets";
+import InnerBreadcrumb from "@/components/InnerBreadcrumb";
+import CopyItem from "@/components/CopyItem";
 import { findAll, serviceDel } from "@/api/gateway/service";
 export default {
-  name: "strategy",
+  name: DIC.SERVICES,
   components: {
     syncService,
     searchBanner,
     uploadService,
+    CopyItem,
+    InnerBreadcrumb,
     servicePlugins,
     queryRoutes,
     targets,
   },
   data() {
     return {
+      entityName: DIC.SERVICES,
       tableSearch: {},
-      tableOption: serviceOption, //表格设置属性
-      serviceColumn: serviceColumn,
+      tableOption: [], //表格设置属性
       searchProps: [{ name: "name" }, { name: "host" }],
       tableData: [], //表格的数据
       tablePage: 1,
@@ -186,12 +178,31 @@ export default {
         currentPage: 1, //当前页数
         pageSize: 10, //每页显示多少条
       },
-      grade: {
-        box: false,
-        syncBox: false,
-        drawerDetail: false,
-      },
       mode: "add",
+      pathKey: DIC.SERVICES,
+      labelArgs: {},
+      path: {
+        label: DIC.SERVICES,
+        key: DIC.SERVICES,
+        children: [
+          {
+            key: DIC.SERVICES + "_add",
+            label: "新建" + DIC.SERVICES,
+          },
+          {
+            key: DIC.SERVICES + "_edit",
+            label: "修改" + DIC.SERVICES,
+          },
+          {
+            key: DIC.SERVICES + "_view",
+            label: "查看" + DIC.SERVICES,
+          },
+          {
+            key: DIC.SERVICES + "_sync",
+            label: "同步" + DIC.SERVICES,
+          },
+        ],
+      },
     };
   },
   computed: {
@@ -214,7 +225,10 @@ export default {
         this.$router.push("/wel/index");
       });
     } else {
-      // this.handleList();
+      this.tableOption = get_options(
+        this.systemProfile.version,
+        this.entityName
+      );
       this.initOptions();
     }
   },
@@ -230,8 +244,8 @@ export default {
     },
     toDetail(form) {
       this.form = form;
-      this.grade.drawerDetail = true;
       this.mode = "view";
+      this.pathKey = this.entityName + "_" + this.mode;
     },
     callback(service) {
       this.form = service;
@@ -239,16 +253,17 @@ export default {
       this.reloadDataList();
     },
     handlerSyncBox() {
-      this.grade.syncBox = true;
+      this.pathKey = this.entityName + "_sync";
     },
     handleGrade(form, index) {
-      this.grade.box = true;
       if (form && form.id) {
         this.form = form;
         this.mode = "edit";
+        this.pathKey = this.entityName + "_" + this.mode;
       } else {
         this.form = {};
         this.mode = "add";
+        this.pathKey = this.entityName + "_" + this.mode;
       }
     },
 
@@ -283,8 +298,11 @@ export default {
       });
     },
     refreshTableList(refresh) {
-      this.initPage(refresh);
-      this.$refs.routeSearch.refresh(this.page, refresh);
+      this.pathKey = this.entityName;
+      if (this.pathKey == this.entityName) {
+        this.initPage(refresh);
+        this.$refs.routeSearch.refresh(this.page, refresh);
+      }
     },
     initPage(refresh) {
       if (!!!refresh) this.tablePage = 1;
