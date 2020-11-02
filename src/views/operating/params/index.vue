@@ -14,6 +14,9 @@
             ref="crud"
             @refresh-change="handlerefreshChange"
           >
+            <template slot-scope="{ row }" slot="create_at">
+              {{ new Date(row.create_at) | dateFormat }}
+            </template>
             <template slot-scope="scope" slot="menuLeft">
               <el-button
                 v-if="permission.params_add"
@@ -30,8 +33,7 @@
                 icon="el-icon-edit"
                 size="small"
                 @click="toEditClient(scope.row, scope.$index)"
-                type="primary"
-                plain
+                type="text"
                 >编辑</el-button
               >
             </template>
@@ -52,6 +54,9 @@
             ref="crud"
             @refresh-change="handlerefreshChange"
           >
+            <template slot-scope="{ row }" slot="create_at">
+              {{ new Date(row.create_at) | dateFormat }}
+            </template>
             <template slot-scope="scope" slot="menuLeft">
               <el-button
                 v-if="permission.params_add"
@@ -68,13 +73,15 @@
                 icon="el-icon-edit"
                 size="small"
                 @click="toEditClient(scope.row, scope.$index)"
-                type="primary"
-                plain
+                type="text"
                 >编辑</el-button
               >
             </template>
             <template slot="expand" slot-scope="{ row }">
-              <json-viewer :value="row.configValue" v-if="row.configType != 'kongschemas'"></json-viewer>
+              <json-viewer
+                :value="row.configValue"
+                v-if="row.configType != 'kongschemas'"
+              ></json-viewer>
               <json-viewer
                 :value="JSON.parse(row.configValue)"
                 :expand-depth="5"

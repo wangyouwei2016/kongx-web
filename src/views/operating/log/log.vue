@@ -1,27 +1,30 @@
 <template>
-  <div style="margin-left:15px;">
+  <div style="margin-left: 15px">
     <div slot="header" class="clearfix">
       <span>
-        <strong>{{dateStr}}</strong>
+        <strong>{{ dateStr }}</strong>
       </span>
       <el-button
         style="float: right; padding: 6px 10px"
         type="text"
         v-if="nextLogTag"
         @click="nextOrpre(nextLogTag)"
-      >下一天</el-button>
+        >下一天</el-button
+      >
       <el-button
         style="float: right; padding: 6px 10px"
         type="primary"
         v-if="preLogTag"
         @click="nextOrpre(preLogTag)"
-      >上一天</el-button>
+        >上一天</el-button
+      >
       <el-button
         style="float: right; padding: 6px 10px"
         type="text"
-        v-if="nextLogTag||preLogTag"
-        @click="reset(nextLogTag||preLogTag)"
-      >返回</el-button>
+        v-if="nextLogTag || preLogTag"
+        @click="reset(nextLogTag || preLogTag)"
+        >返回</el-button
+      >
     </div>
     <el-divider></el-divider>
     <el-timeline v-if="!listView">
@@ -29,17 +32,29 @@
         v-for="(activity, index) in logData"
         placement="top"
         :key="index"
-        :size="index==0?'large':'normal'"
-        :color="activity.status=='success'?'#0bbd87':'#0bbd87'"
+        :size="index == 0 ? 'large' : 'normal'"
+        :color="activity.status == 'success' ? '#0bbd87' : '#0bbd87'"
       >
-        <el-card shadow="hover" style="cursor:pointer;">
-          <el-popover placement="top-start" title="日志内容" width="600" trigger="click" effect="dark">
-            <div style="overflow-y:auto;  height:90%;">
-              <json-viewer :value="JSON.parse(activity.content)" :expand-depth="5" copyable sort></json-viewer>
+        <el-card shadow="hover" style="cursor: pointer">
+          <el-popover
+            placement="top-start"
+            title="日志内容"
+            width="600"
+            trigger="click"
+            effect="dark"
+          >
+            <div style="overflow-y: auto; height: 90%">
+              <json-viewer
+                :value="JSON.parse(activity.content)"
+                :expand-depth="5"
+                copyable
+                sort
+              ></json-viewer>
             </div>
-            <div
-              slot="reference"
-            >{{activity.create_at|parseTime('{h}:{i}:{s}')}}- {{activity.remark}}</div>
+            <div slot="reference">
+              {{ activity.create_at | parseTime("{h}:{i}:{s}") }}-
+              {{ activity.remark }}
+            </div>
           </el-popover>
         </el-card>
       </el-timeline-item>
@@ -55,8 +70,11 @@
       @row-click="handleRowClick"
       @size-change="handleCurrentSize"
       @search-change="handleSearchChange"
-      style="cursor:pointer;"
-    ></avue-crud>
+      style="cursor: pointer"
+      ><template slot-scope="{ row }" slot="create_at">
+        {{ new Date(row.create_at) | dateFormat }}
+      </template></avue-crud
+    >
     <el-drawer
       size="35%"
       title="操作对象内容"
@@ -65,8 +83,20 @@
       :direction="direction"
       :before-close="handleClose"
     >
-      <div style="margin-left:10px;overflow-y:auto; overflow-x:auto;height:90%;">
-        <json-viewer :value="JSON.parse(currentLog.content)" :expand-depth="1" copyable sort></json-viewer>
+      <div
+        style="
+          margin-left: 10px;
+          overflow-y: auto;
+          overflow-x: auto;
+          height: 90%;
+        "
+      >
+        <json-viewer
+          :value="JSON.parse(currentLog.content)"
+          :expand-depth="1"
+          copyable
+          sort
+        ></json-viewer>
       </div>
     </el-drawer>
   </div>
@@ -106,13 +136,13 @@ export default {
       logData: [], //表格的数据,
       currentLog: { content: "{}" },
       drawerDetail: false,
-      currentLogTag: null
+      currentLogTag: null,
     };
   },
   props: {
     logTag: { type: Object, required: true },
     keyword: { required: true },
-    listView: { required: true }
+    listView: { required: true },
   },
   created() {
     this.findSyncLog();
@@ -123,7 +153,7 @@ export default {
     },
     keyword(val) {
       this.findSyncLog();
-    }
+    },
   },
   methods: {
     handleRowClick(row) {
@@ -139,7 +169,7 @@ export default {
     },
     nextOrpre(tag) {
       tag["keyword"] = this.keyword;
-      findAllLogsByDay(tag).then(res => {
+      findAllLogsByDay(tag).then((res) => {
         let _data = res.data.data;
         this.dateStr = _data.dateStr;
         this.preLogTag = _data.logTags.pre;
@@ -147,7 +177,7 @@ export default {
         this.logData = _data.logs;
         this.currentLogTag = _data.logParams;
       });
-    }
-  }
+    },
+  },
 };
 </script>

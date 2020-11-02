@@ -6,9 +6,12 @@ export const userOption = {
     maxHeight: 900,
     labelWidth: 120,
     index: true,
-    border: true,
+    // border: true,
+   
     menuBtn: true,
     selection: true,
+    stripe: true,
+    simplePage: true,
     addBtn: false,
     delBtn: false,
     editBtn: false,
@@ -78,12 +81,8 @@ export const userOption = {
             prop: "create_at",
             sortable: true,
             type: "datetime",
+            slot: true,
             width: 160,
-            format: "yyyy-MM-dd HH:mm:ss",
-            valueFormat: "yyyy-MM-dd HH:mm:ss",
-            formatter: (row, value, label, column) => {
-                return value ;
-            }
         }
     ]
 };
@@ -92,7 +91,8 @@ export const userGroupOption = {
     maxHeight: 900,
     labelWidth: 120,
     index: true,
-    border: true,
+    stripe: true,
+    simplePage: true,
     menuBtn: true,
     addBtn: false,
     delBtn: false,
@@ -152,7 +152,8 @@ export const roleOption = {
     maxHeight: 900,
     labelWidth: 120,
     index: true,
-    border: true,
+    stripe: true,
+    simplePage: true,
     menuBtn: true,
     addBtn: false,
     delBtn: false,
