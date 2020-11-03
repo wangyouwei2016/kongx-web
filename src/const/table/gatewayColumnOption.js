@@ -437,13 +437,24 @@ const COLUMNS_1_3_X = {
     "hmac-auth": hmacColumn
 }
 
+const COLUMNS_1_5_X = COLUMNS_1_3_X
+COLUMNS_1_5_X['Routes'] = _.assign(_.cloneDeep(routeColumn), {
+    column: _.sortBy(_.concat(routeColumn.column, ([{
+        label: "Path Handling", prop: "path_handling", row: true, span: 24, labelWidth: 120,
+        value: 'v1',
+        type: 'radio', dicData: [{ label: 'v0', value: 'v0' }, { label: 'v1', value: 'v1' },], orderBy: 6
+    }])), function (o) {
+        return o.orderBy;
+    })
+})
+
 const KONG_COLUMNS = {
     "1.2.x": COLUMNS_1_2_X,
     "1.3.x": COLUMNS_1_3_X,
     "1.4.x": COLUMNS_1_3_X,
-    "1.5.x": COLUMNS_1_3_X,
-    "2.0.x": COLUMNS_1_3_X,
-    "2.1.x": COLUMNS_1_3_X,
+    "1.5.x": COLUMNS_1_5_X,
+    "2.0.x": COLUMNS_1_5_X,
+    "2.1.x": COLUMNS_1_5_X,
 }
 
 export function get_columns(version, name) {
