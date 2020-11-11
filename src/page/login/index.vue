@@ -13,7 +13,7 @@
         </div>
       </div>
       <div class="login-copyright">
-        Copyright © 2020 raoxiaoyan. All rights reserved.
+        Copyright © 2020 onebytes-plus. All rights reserved.
       </div>
     </div>
   </div>

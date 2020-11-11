@@ -457,6 +457,11 @@ const KONG_COLUMNS = {
     "2.1.x": COLUMNS_1_5_X,
 }
 
+const KONG_VERSIONS = {
+    "1.0": '1.2.x',
+    "2.0": "2.1.x"
+}
+
 export function get_columns(version, name) {
     console.log('Kong version :', version, ',Entity :', name)
     let _v = version
@@ -467,10 +472,11 @@ export function get_columns(version, name) {
         _v = '1.2'
     }
 
-    _v = _v + ".x"
-    let columns = KONG_COLUMNS[_v][name]
+    let _version = _v + ".x"
+    let columns = KONG_COLUMNS[_version]
     if (!!!columns) {
-        columns = KONG_COLUMNS['1.2.x'][name]
+        let v = _v.substr(0, 1) + '.0'
+        columns = KONG_COLUMNS[KONG_VERSIONS[v]]
     }
-    return _.cloneDeep(columns);
+    return _.cloneDeep(columns[name]);
 }
