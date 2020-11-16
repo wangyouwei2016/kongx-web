@@ -9,6 +9,43 @@
           v-model="upstream"
           @submit="handleSave"
         >
+          <template slot="tags">
+            <item-tags
+              :tags="upstream.tags"
+              @sendTag="bindTags"
+              name="tags"
+              column="tags"
+              :mode="mode"
+            ></item-tags>
+          </template>
+          <template slot="hash_on">
+            <el-radio-group
+              v-model="upstream.hash_on"
+              :disabled="mode == 'view'"
+            >
+              <el-radio-button
+                v-for="item in hashOnType"
+                :key="item.value"
+                :label="item.value"
+                :value="item.value"
+                >{{ item.label }}</el-radio-button
+              >
+            </el-radio-group>
+          </template>
+          <template slot="hash_fallback">
+            <el-radio-group
+              v-model="upstream.hash_fallback"
+              :disabled="mode == 'view'"
+            >
+              <el-radio-button
+                v-for="item in hashOnType"
+                :key="item.value"
+                :label="item.value"
+                :value="item.value"
+                >{{ item.label }}</el-radio-button
+              >
+            </el-radio-group>
+          </template>
           <template slot="menuForm" v-if="mode != 'view'">
             <el-button
               type="primary"
@@ -23,37 +60,64 @@
         </avue-form>
       </el-tab-pane>
       <el-tab-pane label="代理列表" v-if="mode != 'add'">
-        <span slot="label"> <i class="el-icon-success"></i> Targets </span>
+        <span slot="label"> <i class="icon-fuzaijunheng"></i> Targets </span>
         <targets :upstream="upstream" ref="targets" :mode="mode"></targets>
       </el-tab-pane>
       <el-tab-pane label="设置健康检查" v-if="mode != 'add'" lazy>
         <span slot="label">
-          <i class="el-icon-warning"></i> 健康检查(ACTIVE)
+          <i class="icon-healthactive"></i> 主动健康检查(Active)
         </span>
-        <health-check :upstream="upstream" :mode="mode"></health-check>
+        <active-health-check
+          :upstream="upstream"
+          :mode="mode"
+        ></active-health-check>
+      </el-tab-pane>
+      <el-tab-pane label="设置健康检查" v-if="mode != 'add'" lazy>
+        <span slot="label">
+          <i class="icon-jiankangjiancha"></i> 被动健康检查(Passive)
+        </span>
+        <passive-health-check
+          :upstream="upstream"
+          :mode="mode"
+        ></passive-health-check>
       </el-tab-pane>
     </el-tabs>
   </div>
 </template>
+<style>
+.avue-group__title {
+  font-size: 16px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.85);
+  margin: 10px;
+}
+</style>
 <script>
 import { mapGetters } from "vuex";
-import { upstreamColumn } from "@/const/table/gatewayOption";
+import { get_columns } from "@/const/table/gatewayColumnOption";
+import { DIC } from "@/const/dic";
 import targets from "./targets";
-import healthCheck from "./healthCheck";
+import activeHealthCheck from "./activeHealthCheck";
+import passiveHealthCheck from "./passiveHealthCheck";
+import ItemTags from "@/components/ItemTags";
 import { upstreamUpdate, upstreamSave } from "@/api/gateway/upstream";
 export default {
   components: {
     targets,
-    healthCheck,
+    activeHealthCheck,
+    passiveHealthCheck,
+    ItemTags,
   },
   name: "upholdUpstream",
   data() {
     return {
-      upstreamColumn: upstreamColumn,
+      hashOnType: DIC.HASH_ON_TYPE,
+      entityName: DIC.UPSTREAMS,
+      upstreamColumn: [],
     };
   },
   computed: {
-    ...mapGetters(["permission", "systemProfile"]),
+    ...mapGetters(["permission", "systemProfile", "kongClient"]),
   },
   props: {
     upstream: {
@@ -63,13 +127,24 @@ export default {
     mode: { required: false },
   },
   created() {
+    let version = this.kongClient.version;
+    this.upstreamColumn = get_columns(version, this.entityName);
     this.initOptions();
   },
   methods: {
     initOptions() {
       this.upstreamColumn.column.forEach((column) => {
+        if (column.prop == "algorithm") {
+          return;
+        }
         column["disabled"] = this.mode == "view";
       });
+
+      this.mode == "view" &&
+        (this.upstreamColumn.group[0]["collapse"] = this.mode == "view");
+    },
+    bindTags(data) {
+      this.upstream = Object.assign(this.upstream, data);
     },
     handlerSubmit() {
       this.$refs.form.submit();

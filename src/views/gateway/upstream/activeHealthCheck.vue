@@ -1,67 +1,54 @@
 <template>
   <div>
-    <el-collapse v-model="activeNames">
-      <avue-form
-        :option="activeHealthCheckOption"
-        v-model="activeHealthForm"
-        ref="form"
-        @submit="handleUpstreamUpdate"
-      >
-        <template slot="fail_http_statuses" slot-scope="scope">
-          {{scope}}
-          <item-tags
-            :tags="activeHealthForm.fail_http_statuses"
-            @sendTag="bindTags"
-            name
-            column="fail_http_statuses"
-            :mode="mode"
-          ></item-tags>
-        </template>
-        <template slot="http_statuses" slot-scope="scope">
-          {{scope}}
-          <item-tags
-            :tags="activeHealthForm.http_statuses"
-            @sendTag="bindTags"
-            name
-            column="http_statuses"
-            :mode="mode"
-          ></item-tags>
-        </template>
-        <template slot="menuForm" v-if="mode!='view'">
-          <el-button type="primary" class="el-icon-check" @click="handlerSubmit">提 交</el-button>
-          <el-button @click="handleEmpty" class="el-icon-delete">清 空</el-button>
-        </template>
-      </avue-form>
-      <!-- </el-collapse-item> -->
-      <!-- <el-collapse-item name="passive">
-        <template slot="title">
-          <i class="header-icon el-icon-info"></i>被动健康检查
-        </template>
-        <avue-form
-          :option="passiveHealthCheckOption"
-          v-model="passiveHealthForm"
-          @submit="handleUpstreamUpdate"
-        ></avue-form>
-      </el-collapse-item>-->
-    </el-collapse>
+    <avue-form
+      :option="activeHealthCheckOption"
+      v-model="activeHealthForm"
+      ref="form"
+      @submit="handleUpstreamUpdate"
+    >
+      <template slot="fail_http_statuses" slot-scope="scope">
+        {{ scope }}
+        <item-tags
+          :tags="activeHealthForm.fail_http_statuses"
+          @sendTag="bindTags"
+          name
+          column="fail_http_statuses"
+          :mode="mode"
+        ></item-tags>
+      </template>
+      <template slot="http_statuses" slot-scope="scope">
+        {{ scope }}
+        <item-tags
+          :tags="activeHealthForm.http_statuses"
+          @sendTag="bindTags"
+          name
+          column="http_statuses"
+          :mode="mode"
+        ></item-tags>
+      </template>
+      <template slot="menuForm" v-if="mode != 'view'">
+        <el-button type="primary" class="el-icon-check" @click="handlerSubmit"
+          >提 交</el-button
+        >
+        <el-button @click="handleEmpty" class="el-icon-delete">清 空</el-button>
+      </template>
+    </avue-form>
   </div>
 </template>
 <script>
 import {
   activeHealthCheckOption,
   passiveHealthCheckOption,
-  targetColumn,
 } from "@/const/table/gatewayOption";
 import { upstreamUpdate, addTargets, targetDel } from "@/api/gateway/upstream";
 import ItemTags from "@/components/ItemTags.vue";
 export default {
-  name: "healthCheck",
+  name: "activeHealthCheck",
   components: { ItemTags },
   data() {
     return {
       activeHealthCheckOption: activeHealthCheckOption,
       passiveHealthCheckOption: passiveHealthCheckOption,
-      targetColumn: targetColumn,
       activeHealthForm: {
         http_statuses: ["200", "304"],
         fail_http_statuses: [
@@ -90,7 +77,6 @@ export default {
     mode: { required: true },
   },
   created() {
-    console.log(this.upstream);
     this.initform(this.upstream);
     this.initOptions();
   },
@@ -100,6 +86,7 @@ export default {
         group.column.forEach((column) => {
           column["disabled"] = this.mode == "view";
         });
+        this.mode == "view" && (group["collapse"] = this.mode == "view");
       });
     },
     bindTags(data) {

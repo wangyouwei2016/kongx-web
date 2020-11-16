@@ -187,11 +187,11 @@ export const syncConfigOption = {
     expand: true,
     labelWidth: 120,
     index: true,
-    border: true,
     menuBtn: true,
     addBtn: false,
     delBtn: false,
     editBtn: false,
+    simplePage: true,
     refreshBtn: false,
     columnBtn: false,
     menuAlign: 'center',
@@ -231,11 +231,7 @@ export const syncConfigOption = {
             width: "180",
             sortable: true,
             type: "datetime",
-            format: "yyyy-MM-dd HH:mm:ss",
-            valueFormat: "yyyy-MM-dd HH:mm:ss",
-            formatter: (row, value, label, column) => {
-                return value;
-            }
+            slot: true,
         },
         {
             label: "同步状态",
@@ -340,8 +336,8 @@ export const configOption = {
     labelWidth: 120,
     simplePage: true,
     index: true,
-    border: true,
     menuBtn: true,
+    stripe: true,
     addBtn: false,
     delBtn: false,
     editBtn: false,
@@ -371,11 +367,7 @@ export const configOption = {
             width: "180",
             sortable: true,
             type: "datetime",
-            format: "yyyy-MM-dd HH:mm:ss",
-            valueFormat: "yyyy-MM-dd HH:mm:ss",
-            formatter: (row, value, label, column) => {
-                return value;
-            }
+            slot: true
         }
 
     ]
@@ -419,11 +411,12 @@ export const operationLogOption = {
     maxHeight: 600,
     labelWidth: 120,
     index: true,
-    border: true,
+    // border: true,
     menuBtn: false,
     addBtn: false,
     delBtn: false,
     editBtn: false,
+    stripe: true,
     menu: false,
     simplePage: true,
     refreshBtn: false,
@@ -437,6 +430,7 @@ export const operationLogOption = {
             prop: "create_at",
             width: "180",
             sortable: true,
+            slot: true,
             type: "datetime",
             format: "yyyy-MM-dd HH:mm:ss",
             valueFormat: "yyyy-MM-dd HH:mm:ss",

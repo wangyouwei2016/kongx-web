@@ -4,15 +4,19 @@
       :option="targetColumn"
       v-model="targetForm"
       @submit="handleTargetSave"
-      v-if="mode!='view'"
+      v-if="mode != 'view'"
     ></avue-form>
-    <avue-crud :option="targetOption" :data="targetData" @row-del="handleTargetDel">
+    <avue-crud
+      :option="targetOption"
+      :data="targetData"
+      @row-del="handleTargetDel"
+    >
       <template slot="empty">暂无服务代理，请添加服务代理</template>
-      <template slot="health" slot-scope="{row}">
+      <template slot="health" slot-scope="{ row }">
         <img
-          :src="'/svg/'+row.health.toLowerCase()+'.svg'"
+          :src="'/svg/' + row.health.toLowerCase() + '.svg'"
           class="image"
-          style="width:20px;height:20px;"
+          style="width: 20px; height: 20px"
           :title="row.health"
         />
       </template>
@@ -21,45 +25,47 @@
           icon="el-icon-delete"
           size="small"
           plain
-          @click="handleTargetDel(scope.row,scope.$index)"
+          @click="handleTargetDel(scope.row, scope.$index)"
           type="danger"
-        >删除</el-button>
+          >删除</el-button
+        >
       </template>
     </avue-crud>
   </div>
 </template>
 <script>
 import { mapGetters } from "vuex";
-import { targetOption, targetColumn } from "@/const/table/gatewayOption";
+import { get_columns } from "@/const/table/gatewayColumnOption";
+import { targetOption } from "@/const/table/gatewayOption";
+import { DIC } from "@/const/dic";
 import { findTargets, addTargets, targetDel } from "@/api/gateway/upstream";
 export default {
   name: "targets",
   data() {
     return {
+      targetColumn: [],
       targetOption: targetOption,
-      targetColumn: targetColumn,
       targetForm: {},
       targetData: [],
-      grade: {
-        box: true
-      }
+      name: DIC.TARGETS,
     };
   },
   props: {
     upstream: {
       type: Object,
-      required: false
+      required: false,
     },
     mode: { required: true },
-    client: { type: Object, required: true, id: -1 }
+    client: { type: Object, required: true, id: -1 },
   },
-   computed: {
+  computed: {
     ...mapGetters([
       "permission",
       "isDevProfile",
       "isProdProfile",
-      "systemProfile"
-    ])
+      "systemProfile",
+      "kongClient",
+    ]),
   },
   mounted() {
     const timer = setInterval(() => {
@@ -72,6 +78,8 @@ export default {
   },
   created() {
     this.handleList(this.upstream);
+    let version = this.kongClient.version;
+    this.targetColumn = get_columns(version, this.name);
     this.initOptions();
   },
   methods: {
@@ -90,7 +98,7 @@ export default {
       this.tableLoading = true;
       if (form.id) {
         this.client = this.client || {};
-        findTargets(form, this.client).then(res => {
+        findTargets(form, this.client).then((res) => {
           this.targetData = res.data.data;
         });
       }
@@ -100,7 +108,7 @@ export default {
       this.targetForm = row;
       this.targetForm.upstream = { id: this.upstream.id };
       delete this.targetForm.id;
-      addTargets(row).then(res => {
+      addTargets(row).then((res) => {
         let _data = res.data;
         if (_data.status != 0) {
           this.$errorInfo(_data.errmsg);
@@ -120,10 +128,10 @@ export default {
       this.$confirm(_message + `是否确认删除?`, "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
-        type: "warning"
+        type: "warning",
       })
         .then(() => {
-          targetDel({ upstream: this.upstream, id: row.id }).then(res => {
+          targetDel({ upstream: this.upstream, id: row.id }).then((res) => {
             let _data = res.data;
             if (_data.status != 0) {
               this.$errorInfo(_data.errmsg);
@@ -136,7 +144,7 @@ export default {
           });
         })
         .catch(() => {});
-    }
-  }
+    },
+  },
 };
 </script>

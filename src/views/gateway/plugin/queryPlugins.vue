@@ -1,31 +1,39 @@
 <template>
   <div>
-    <avue-crud :option="queryPluginsOption" :data="routeData" @row-del="handleTargetDel">
-      <template slot="empty">暂无数据，请添加</template>
+    <avue-crud
+      :option="queryPluginsOption"
+      :data="routeData"
+      @row-del="handleTargetDel"
+    >
+      <template slot="empty">暂无插件，请添加</template>
+      <template slot-scope="{ row }" slot="created_at">
+        {{ new Date(row.created_at * 1000) | dateFormat }}
+      </template>
       <template slot-scope="scope" slot="menuRight">
         <el-button
-          v-if="mode=='edit'"
+          v-if="mode == 'edit'"
           icon="el-icon-plus"
           size="small"
-          @click="toAddPlugin(scope.row,scope.$index)"
+          @click="toAddPlugin(scope.row, scope.$index)"
           type="primary"
-        >新增插件</el-button>
+          >新增插件</el-button
+        >
       </template>
       <template slot-scope="scope" slot="menu">
         <el-button
           icon="el-icon-edit"
           size="small"
-          @click="toEditPlugin(scope.row,scope.$index)"
-          plain
-          type="primary"
-        >编辑</el-button>
+          @click="toEditPlugin(scope.row, scope.$index)"
+          type="text"
+          >编辑</el-button
+        >
         <el-button
-          icon="el-icon-edit"
+          icon="el-icon-delete"
           size="small"
-          @click="handleTargetDel(scope.row,scope.$index)"
-          plain
-          type="danger"
-        >删除</el-button>
+          @click="handleTargetDel(scope.row, scope.$index)"
+          type="text"
+          >删除</el-button
+        >
       </template>
     </avue-crud>
     <el-dialog
@@ -40,6 +48,7 @@
         @callback="pluginCallback"
         :route="route"
         :service="service"
+        :consumer="consumer"
       ></list-plugin>
     </el-dialog>
     <el-dialog
@@ -70,6 +79,7 @@ import { queryPluginsOption } from "@/const/table/gatewayOption";
 import {
   findAllByRoute,
   findAllByService,
+  findAllByCustomer,
   pluginsDel,
   findPluginSchema,
 } from "@/api/gateway/plugins";
@@ -85,9 +95,13 @@ export default {
   },
   data() {
     return {
-      queryPluginsOption: queryPluginsOption,
+      queryPluginsOption: _.cloneDeep(queryPluginsOption),
       routeData: [],
-      pluginForm: { service: this.service, route: this.route },
+      pluginForm: {
+        service: this.service,
+        route: this.route,
+        consumer: this.consumer,
+      },
       activeNames: "listRoute",
       hiddenAddRoute: true,
       pluginUpdate: false,
@@ -97,6 +111,7 @@ export default {
   props: {
     service: { type: Object, required: false },
     route: { type: Object, required: false },
+    consumer: { type: Object, required: false },
     mode: { required: false },
   },
   computed: {
@@ -149,6 +164,10 @@ export default {
         this.pluginForm.service = { id: this.service.id };
         this.queryListByService(this.service);
       }
+      if (this.consumer) {
+        this.pluginForm.consumer = { id: this.consumer.id };
+        this.queryListByCustomer(this.consumer);
+      }
     },
 
     queryListByRoute(form) {
@@ -158,6 +177,12 @@ export default {
     },
     queryListByService(form) {
       findAllByService(this.pluginForm).then((res) => {
+        this.routeData = res.data.data;
+      });
+    },
+
+    queryListByCustomer(form) {
+      findAllByCustomer(this.pluginForm).then((res) => {
         this.routeData = res.data.data;
       });
     },

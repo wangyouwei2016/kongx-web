@@ -1,140 +1,145 @@
 <template>
   <div>
+    <basic-container v-if="pathKey != entityName">
+      <div>
+        <inner-breadcrumb
+          v-model="pathKey"
+          showBack="true"
+          :path="path"
+          :labelArgs="labelArgs"
+        ></inner-breadcrumb>
+      </div>
+    </basic-container>
     <basic-container>
-      <search-banner
-        ref="routeSearch"
-        placeholder="请输入USERNAME、TAGS"
-        :handleList="handleList"
-        :span="isDevProfile ? 21 : 24"
-        :searchProps="searchProps"
-        :page="page"
-        @search-change="searchChange"
-      >
-        <template slot="menu">
-          <el-button
-            v-if="isDevProfile"
-            icon="el-icon-plus"
-            size="small"
-            @click="handleGrade({})"
-            type="primary"
-            >新增</el-button
-          >
-        </template>
-      </search-banner>
-      <avue-crud
-        :option="tableOption"
-        :data="tableData"
-        :table-loading="tableLoading"
-        :page="page"
-        @row-click="handleRowClick"
-        @row-save="handleSave"
-        @row-del="handleDel"
-        @refresh-change="handlerefreshChange"
-        @current-change="handleCurrentChange"
-        @size-change="handleCurrentSize"
-        @search-change="handleSearchChange"
-      >
-        <template slot="username" slot-scope="{ row }">
-          <el-link :underline="false" type="success" @click="toDetail(row)">{{
-            row.username
-          }}</el-link>
-        </template>
-        <template slot="tags" slot-scope="{ row }">
-          <item-tags
-            :tags="row.tags"
-            @sendTag="bindTags"
-            name="tags"
-            column="tags"
-            mode="view"
-          ></item-tags>
-        </template>
-        <template slot-scope="scope" slot="menu">
-          <el-button
-            v-if="isDevProfile"
-            icon="el-icon-edit"
-            size="small"
-            @click="handleGrade(scope.row, scope.$index)"
-            type="text"
-            >编辑</el-button
-          >
-          <el-button
-            v-if="isDevProfile"
-            icon="el-icon-delete"
-            size="small"
-            @click="handleDel(scope.row, scope.$index)"
-            type="text"
-            >删除</el-button
-          >
-        </template>
-      </avue-crud>
-      <el-drawer
-        title="CONSUMERS"
-        size="50%"
-        :visible.sync="grade.box"
-        v-if="grade.box"
-      >
-        <div
-          style="
-            margin-left: 10px;
-            overflow-y: auto;
-            overflow-x: auto;
-            height: 90%;
-          "
+      <div v-if="pathKey == entityName">
+        <search-banner
+          ref="routeSearch"
+          placeholder="请输入Username、Custom_id、Tags"
+          :handleList="handleList"
+          :span="permission.consumer_add || isDevProfile ? 21 : 24"
+          :searchProps="searchProps"
+          :page="page"
+          @search-change="searchChange"
         >
-          <upload-consumer
-            :entity="form"
-            :mode="mode"
-            @callback="callback"
-          ></upload-consumer>
-        </div>
-      </el-drawer>
+          <template slot="menu">
+            <el-button
+              v-if="permission.consumer_add || isDevProfile"
+              icon="el-icon-plus"
+              size="small"
+              @click="handleGrade({})"
+              type="primary"
+              >新增{{ entityName }}</el-button
+            >
+          </template>
+        </search-banner>
+        <avue-crud
+          :option="tableOption"
+          :data="tableData"
+          :table-loading="tableLoading"
+          :page="page"
+          @row-click="handleRowClick"
+          @row-save="handleSave"
+          @row-del="handleDel"
+          @refresh-change="handlerefreshChange"
+          @current-change="handleCurrentChange"
+          @size-change="handleCurrentSize"
+          @search-change="handleSearchChange"
+        >
+          <template slot="id" slot-scope="{ row }">
+            <copy-item :value="row.id"></copy-item>
+          </template>
+          <template slot-scope="{ row }" slot="created_at">
+            {{ new Date(row.created_at * 1000) | dateFormat }}
+          </template>
+          <template slot="empty" v-if="permission.consumer_add || isDevProfile">
+            <div class="avue-empty__image" style="height: 50px">
+              <img
+                src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNDEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMCAxKSIgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj4KICAgIDxlbGxpcHNlIGZpbGw9IiNGNUY1RjUiIGN4PSIzMiIgY3k9IjMzIiByeD0iMzIiIHJ5PSI3Ii8+CiAgICA8ZyBmaWxsLXJ1bGU9Im5vbnplcm8iIHN0cm9rZT0iI0Q5RDlEOSI+CiAgICAgIDxwYXRoIGQ9Ik01NSAxMi43Nkw0NC44NTQgMS4yNThDNDQuMzY3LjQ3NCA0My42NTYgMCA0Mi45MDcgMEgyMS4wOTNjLS43NDkgMC0xLjQ2LjQ3NC0xLjk0NyAxLjI1N0w5IDEyLjc2MVYyMmg0NnYtOS4yNHoiLz4KICAgICAgPHBhdGggZD0iTTQxLjYxMyAxNS45MzFjMC0xLjYwNS45OTQtMi45MyAyLjIyNy0yLjkzMUg1NXYxOC4xMzdDNTUgMzMuMjYgNTMuNjggMzUgNTIuMDUgMzVoLTQwLjFDMTAuMzIgMzUgOSAzMy4yNTkgOSAzMS4xMzdWMTNoMTEuMTZjMS4yMzMgMCAyLjIyNyAxLjMyMyAyLjIyNyAyLjkyOHYuMDIyYzAgMS42MDUgMS4wMDUgMi45MDEgMi4yMzcgMi45MDFoMTQuNzUyYzEuMjMyIDAgMi4yMzctMS4zMDggMi4yMzctMi45MTN2LS4wMDd6IiBmaWxsPSIjRkFGQUZBIi8+CiAgICA8L2c+CiAgPC9nPgo8L3N2Zz4K"
+                alt=""
+              />
+            </div>
+            <h3>
+              <el-button
+                icon="el-icon-plus"
+                type="text"
+                @click="handleGrade({})"
+                ><strong>新增{{ entityName }}</strong></el-button
+              >
+            </h3></template
+          >
+          <template slot="username" slot-scope="{ row }">
+            <el-link :underline="false" type="success" @click="toDetail(row)">{{
+              row.username
+            }}</el-link>
+          </template>
+          <template slot="tags" slot-scope="{ row }">
+            <item-tags
+              :tags="row.tags"
+              @sendTag="bindTags"
+              name="tags"
+              column="tags"
+              mode="view"
+            ></item-tags>
+          </template>
+          <template slot-scope="scope" slot="menu">
+            <el-button
+              v-if="permission.consumer_update || isDevProfile"
+              icon="el-icon-edit"
+              size="small"
+              @click="handleGrade(scope.row, scope.$index)"
+              type="text"
+              >编辑</el-button
+            >
+            <el-button
+              v-if="permission.consumer_delete || isDevProfile"
+              icon="el-icon-delete"
+              size="small"
+              @click="handleDel(scope.row, scope.$index)"
+              type="text"
+              >删除</el-button
+            >
+          </template>
+        </avue-crud>
+      </div>
 
-      <el-drawer
-        size="50%"
-        :title="'\'' + form.username + '\' 详情'"
-        :visible.sync="grade.drawerDetail"
-        v-if="grade.drawerDetail"
-        :direction="direction"
-        :before-close="handleClose"
-      >
-        <div
-          style="
-            margin-left: 10px;
-            overflow-y: auto;
-            overflow-x: auto;
-            width: 100%;
-            height: 90%;
-          "
-        >
-          <upload-consumer
-            :entity="form"
-            :mode="mode"
-            @callback="callback"
-          ></upload-consumer>
-        </div>
-      </el-drawer>
+      <div v-if="pathKey == entityName + '_' + mode">
+        <uphold-consumer
+          :entity="form"
+          :mode="mode"
+          @callback="callback"
+        ></uphold-consumer>
+      </div>
     </basic-container>
   </div>
 </template>
 <script>
-import { consumersOption } from "@/const/table/gatewayOption";
+import { get_options } from "@/const/table/gatewayOption";
 import { mapGetters } from "vuex";
-import uploadConsumer from "./upload-consumer";
+import { DIC } from "@/const/dic.js";
+import upholdConsumer from "./uphold-consumer";
 import searchBanner from "@/components/searchBanner";
 import { findAll, consumerDel } from "@/api/gateway/consumer";
 import ItemTags from "@/components/ItemTags";
+import InnerBreadcrumb from "@/components/InnerBreadcrumb";
+import CopyItem from "@/components/CopyItem";
 export default {
-  name: "strategy",
+  name: DIC.CONSUMERS + "_list",
   components: {
     ItemTags,
     searchBanner,
-    uploadConsumer,
+    upholdConsumer,
+    CopyItem,
+    InnerBreadcrumb,
   },
   data() {
     return {
       tableSearch: {},
-      tableOption: consumersOption, //表格设置属性
-      searchProps: [{ name: "username" }, { name: "tags", type: "array" }],
+      tableOption: [], //表格设置属性
+      searchProps: [
+        { name: "username" },
+        { name: "custom_id" },
+        { name: "tags", type: "array" },
+      ],
       tableData: [], //表格的数据
       tablePage: 1,
       tableSize: 10,
@@ -145,11 +150,28 @@ export default {
         currentPage: 1, //当前页数
         pageSize: 10, //每页显示多少条
       },
-      grade: {
-        box: false,
-        drawerDetail: false,
-      },
       mode: "add",
+      entityName: DIC.CONSUMERS,
+      pathKey: DIC.CONSUMERS,
+      labelArgs: {},
+      path: {
+        label: DIC.CONSUMERS,
+        key: DIC.CONSUMERS,
+        children: [
+          {
+            key: DIC.CONSUMERS + "_add",
+            label: "新建" + DIC.CONSUMERS,
+          },
+          {
+            key: DIC.CONSUMERS + "_edit",
+            label: "修改" + DIC.CONSUMERS,
+          },
+          {
+            key: DIC.CONSUMERS + "_view",
+            label: "查看" + DIC.CONSUMERS,
+          },
+        ],
+      },
     };
   },
   computed: {
@@ -160,19 +182,16 @@ export default {
       "systemProfile",
     ]),
   },
-  props: {
-    type: {
-      type: String,
-      required: false,
-    },
-  },
   created() {
     if (this.systemProfile.id == -1) {
       this.$nextTick((_) => {
         this.$router.push("/wel/index");
       });
     } else {
-      // this.handleList();
+      this.tableOption = get_options(
+        this.systemProfile.version,
+        this.entityName
+      );
       this.initOptions();
     }
   },
@@ -188,25 +207,24 @@ export default {
     },
     toDetail(form) {
       this.form = form;
-      this.grade.drawerDetail = true;
       this.mode = "view";
+      this.pathKey = this.entityName + "_" + this.mode;
     },
     callback(service) {
       this.form = service;
       this.mode = "edit";
+      this.pathKey = this.entityName + "_" + this.mode;
       this.reloadDataList();
     },
-    handlerSyncBox() {
-      this.grade.syncBox = true;
-    },
     handleGrade(form, index) {
-      this.grade.box = true;
       if (form && form.id) {
         this.form = form;
         this.mode = "edit";
+        this.pathKey = this.entityName + "_" + this.mode;
       } else {
         this.form = {};
         this.mode = "add";
+        this.pathKey = this.entityName + "_" + this.mode;
       }
     },
 
@@ -234,7 +252,6 @@ export default {
      **/
     handleList(form) {
       this.tableLoading = true;
-      this.grade.box = false;
       return findAll(Object.assign({}, form)).then((res) => {
         let data = res.data;
         this.tableLoading = false;
@@ -255,8 +272,11 @@ export default {
     },
     //再次加载
     reloadDataList() {
-      this.initPage(false);
-      this.$refs.routeSearch.loadData();
+      this.pathKey = this.entityName;
+      if (this.pathKey == this.entityName) {
+        this.initPage(false);
+        this.$refs.routeSearch.loadData();
+      }
     },
     /**
      * @title 单点行选择行数据

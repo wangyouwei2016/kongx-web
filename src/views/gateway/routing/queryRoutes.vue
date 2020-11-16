@@ -7,59 +7,78 @@
       @expand-change="expandChanges"
     >
       <template slot="empty">暂无服务路由，请添加</template>
-      <template slot="expand" slot-scope="{row}">
-        <el-form label-width="80px" style="margin-left:10px;">
-          <el-form-item label="Host" v-if="row.hosts && row.hosts.length>0">
-            <item-tags :tags="row.hosts" name="匹配路径" column="paths" mode="view"></item-tags>
+      <template slot="expand" slot-scope="{ row }">
+        <el-form label-width="80px" style="margin-left: 10px">
+          <el-form-item label="Host" v-if="row.hosts && row.hosts.length > 0">
+            <item-tags
+              :tags="row.hosts"
+              name="匹配路径"
+              column="paths"
+              mode="view"
+            ></item-tags>
           </el-form-item>
           <el-form-item label="路由PATH">
-            <item-tags :tags="row.paths" name="匹配路径" column="paths" mode="view"></item-tags>
+            <item-tags
+              :tags="row.paths"
+              name="匹配路径"
+              column="paths"
+              mode="view"
+            ></item-tags>
           </el-form-item>
           <el-form-item label="插件列表">
             <query-plugins :route="row" mode="view"></query-plugins>
           </el-form-item>
         </el-form>
       </template>
-      <template slot="hosts" slot-scope="{row}">
+      <template slot="hosts" slot-scope="{ row }">
         <el-tag
           v-for="tag in row.hosts"
           :key="tag"
           :disable-transitions="false"
           @close="handleClose(tag)"
-        >{{tag}}</el-tag>
+          >{{ tag }}</el-tag
+        >
       </template>
-      <template slot="paths" slot-scope="{row}">
+      <template slot="paths" slot-scope="{ row }">
         <el-tag
           v-for="tag in row.paths"
           :key="tag"
           :disable-transitions="false"
           @close="handleClose(tag)"
-        >{{tag}}</el-tag>
+          >{{ tag }}</el-tag
+        >
       </template>
-      <template slot-scope="scope" slot="menuRight" v-if="mode!='view'">
+      <template slot-scope="scope" slot="menuRight" v-if="mode != 'view'">
         <el-button
           icon="el-icon-plus"
           size="small"
-          @click="toAddRoute(scope.row,scope.$index)"
+          @click="toAddRoute(scope.row, scope.$index)"
           type="primary"
-        >新增路由</el-button>
-        <update-hosts @callback="pluginCallback" placement="bottom-end" :service="{id:service.id}"></update-hosts>
+          >新增路由</el-button
+        >
+        <update-hosts
+          @callback="pluginCallback"
+          placement="bottom-end"
+          :service="{ id: service.id }"
+        ></update-hosts>
       </template>
       <template slot-scope="scope" slot="menu">
         <el-button
           icon="el-icon-edit"
           size="small"
-          @click="toEditRoute(scope.row,scope.$index)"
+          @click="toEditRoute(scope.row, scope.$index)"
           plain
           type="primary"
-        >编辑</el-button>
+          >编辑</el-button
+        >
         <el-button
           icon="el-icon-edit"
           size="small"
-          @click="handleTargetDel(scope.row,scope.$index)"
+          @click="handleTargetDel(scope.row, scope.$index)"
           plain
           type="danger"
-        >删除</el-button>
+          >删除</el-button
+        >
       </template>
     </avue-crud>
     <el-dialog
@@ -69,7 +88,11 @@
       v-if="grade.addPluginBox"
       append-to-body
     >
-      <uphold-route :route="routeForm" @callback="pluginCallback" mode="add"></uphold-route>
+      <uphold-route
+        :route="routeForm"
+        @callback="pluginCallback"
+        mode="add"
+      ></uphold-route>
     </el-dialog>
     <el-dialog
       title="编辑路由"
@@ -78,7 +101,11 @@
       v-if="grade.editPluginBox"
       append-to-body
     >
-      <uphold-route :route="routeForm" @callback="pluginCallback" :mode="mode"></uphold-route>
+      <uphold-route
+        :route="routeForm"
+        @callback="pluginCallback"
+        :mode="mode"
+      ></uphold-route>
     </el-dialog>
   </div>
 </template>
@@ -96,23 +123,23 @@ export default {
     ItemTags,
     upholdRoute,
     queryPlugins,
-    updateHosts
+    updateHosts,
   },
   data() {
     return {
-      routingOption: serviceRouteOption,
+      routingOption: _.cloneDeep(serviceRouteOption),
       routeData: [],
       routeForm: { service: { id: this.service.id } },
-      grade: { editPluginBox: false, addPluginBox: false }
+      grade: { editPluginBox: false, addPluginBox: false },
     };
   },
   computed: {
-    ...mapGetters(["permission", "isProdProfile", "systemProfile"])
+    ...mapGetters(["permission", "isProdProfile", "systemProfile"]),
   },
   props: {
     service: { type: Object, required: false },
     client: { required: false },
-    mode: { required: false }
+    mode: { required: false },
   },
   created() {
     this.handleList();
@@ -156,7 +183,7 @@ export default {
     handleList(form) {
       this.tableLoading = true;
       this.client = this.client || {};
-      findAllByService(this.service, this.client).then(res => {
+      findAllByService(this.service, this.client).then((res) => {
         this.routeData = res.data.data;
       });
     },
@@ -166,10 +193,10 @@ export default {
       this.$confirm(_message + `是否确认删除?`, "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
-        type: "warning"
+        type: "warning",
       })
         .then(() => {
-          routeDel({ id: row.id }).then(res => {
+          routeDel({ id: row.id }).then((res) => {
             let _data = res.data;
             if (_data.status != 0) {
               this.$errorInfo(_data.errmsg);
@@ -180,7 +207,7 @@ export default {
           });
         })
         .catch(() => {});
-    }
-  }
+    },
+  },
 };
 </script>

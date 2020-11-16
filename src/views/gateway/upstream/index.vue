@@ -1,177 +1,160 @@
 <template>
   <div>
+    <basic-container v-if="pathKey != entityName">
+      <div>
+        <inner-breadcrumb
+          v-model="pathKey"
+          showBack="true"
+          :path="path"
+          :labelArgs="labelArgs"
+        ></inner-breadcrumb>
+      </div>
+    </basic-container>
     <basic-container>
-      <search-banner
-        ref="routeSearch"
-        :span="permission.upstream_add || isDevProfile ? 22 : 24"
-        placeholder="请输入upstream名称"
-        :handleList="handleList"
-        :searchProps="searchProps"
-        :page="page"
-        @search-change="searchChange"
-      >
-        <template slot="menu">
-          <el-button
-            v-if="permission.upstream_add || isDevProfile"
-            icon="el-icon-plus"
-            size="small"
-            @click="handleGrade({})"
-            type="primary"
-            >新增</el-button
-          >
-        </template>
-      </search-banner>
-      <avue-crud
-        :option="tableOption"
-        :data="tableData"
-        :table-loading="tableLoading"
-        :page="page"
-        @row-click="handleRowClick"
-        @row-save="handleSave"
-        @row-del="handleDel"
-        @refresh-change="handlerefreshChange"
-        @current-change="handleCurrentChange"
-        @size-change="handleCurrentSize"
-        @search-change="handleSearchChange"
-      >
-        <template slot="expand" slot-scope="{ row }">
-          <el-form label-width="80px" style="margin-left: 10px">
-            <el-form-item label="代理列表">
-              <targets :upstream="row" ref="targets" mode="view"></targets>
-            </el-form-item>
-          </el-form>
-        </template>
-        <!-- <template slot-scope="scope" slot="menuLeft">
-          <el-button
-            v-if="permission.upstream_add||isDevProfile"
-            icon="el-icon-plus"
-            size="small"
-            @click="handleGrade(scope.row,scope.$index)"
-            type="primary"
-          >新增</el-button>
-        </template> -->
-        <template slot="name" slot-scope="{ row }">
-          <el-link :underline="false" type="success" @click="toDetail(row)">{{
-            row.name
-          }}</el-link>
-        </template>
-        <template slot-scope="scope" slot="menu">
-          <el-button
-            v-if="permission.upstream_update || isDevProfile"
-            icon="el-icon-edit"
-            size="small"
-            type="text"
-            @click="handleGrade(scope.row, scope.$index)"
-            >编辑</el-button
-          >
-          <el-button
-            v-if="
-              !permission.upstream_update && !isDevProfile && !isProdProfile
-            "
-            icon="el-icon-edit"
-            size="small"
-            @click="handleTargetsGrade(scope.row, scope.$index)"
-            type="text"
-            >配置Targets</el-button
-          >
-          <el-button
-            v-if="permission.upstream_delete || isDevProfile"
-            icon="el-icon-delete"
-            @click="handleDel(scope.row, scope.$index)"
-            size="small"
-            type="text"
-            >删除</el-button
-          >
-        </template>
-      </avue-crud>
-      <el-drawer
-        title="上游代理(UPSTREAM)"
-        size="50%"
-        :visible.sync="grade.box"
-        v-if="grade.box"
-        :direction="direction"
-      >
-        <div
-          style="
-            margin-left: 10px;
-            overflow-y: auto;
-            overflow-x: auto;
-            height: 90%;
-          "
+      <div v-if="pathKey === entityName">
+        <search-banner
+          ref="routeSearch"
+          :span="permission.upstream_add || isDevProfile ? 21 : 24"
+          placeholder="请输入upstream名称"
+          :handleList="handleList"
+          :searchProps="searchProps"
+          :page="page"
+          @search-change="searchChange"
         >
-          <uphold-upstream
-            :upstream="form"
-            @callback="callback"
-            :mode="mode"
-          ></uphold-upstream>
-        </div>
-      </el-drawer>
-      <el-drawer
-        title="编辑代理列表"
-        size="50%"
-        :visible.sync="grade.targetBox"
-        v-if="grade.targetBox"
-      >
-        <div
-          style="
-            margin-left: 10px;
-            overflow-y: auto;
-            overflow-x: auto;
-            height: 90%;
-          "
+          <template slot="menu">
+            <el-button
+              v-if="permission.upstream_add || isDevProfile"
+              icon="el-icon-plus"
+              size="small"
+              @click="handleGrade({})"
+              type="primary"
+              >新增{{ entityName }}</el-button
+            >
+          </template>
+        </search-banner>
+        <avue-crud
+          :option="tableOption"
+          :data="tableData"
+          :table-loading="tableLoading"
+          :page="page"
+          @row-click="handleRowClick"
+          @row-save="handleSave"
+          @row-del="handleDel"
+          @refresh-change="handlerefreshChange"
+          @current-change="handleCurrentChange"
+          @size-change="handleCurrentSize"
+          @search-change="handleSearchChange"
         >
-          <uphold-targets
-            :upstream="form"
-            @callback="callback"
-            :mode="mode"
-          ></uphold-targets>
-        </div>
-      </el-drawer>
-      <el-drawer
-        size="45%"
-        :title="'\'' + form.name + '\' 详情'"
-        :visible.sync="grade.drawerDetail"
-        v-if="grade.drawerDetail"
-        :direction="direction"
-        :before-close="handleClose"
-      >
-        <div
-          style="
-            margin-left: 10px;
-            overflow-y: auto;
-            overflow-x: auto;
-            height: 90%;
-          "
-        >
-          <uphold-upstream :upstream="form" mode="view"></uphold-upstream>
-        </div>
-      </el-drawer>
+          <template slot="id" slot-scope="{ row }">
+            <copy-item :value="row.id"></copy-item>
+          </template>
+          <template slot="expand" slot-scope="{ row }">
+            <el-form label-width="80px" style="margin-left: 10px">
+              <el-form-item label="代理列表">
+                <targets :upstream="row" ref="targets" mode="view"></targets>
+              </el-form-item>
+            </el-form>
+          </template>
+
+          <template slot="name" slot-scope="{ row }">
+            <el-link :underline="false" type="success" @click="toDetail(row)">{{
+              row.name
+            }}</el-link>
+          </template>
+          <template slot-scope="{ row }" slot="created_at">
+            {{ new Date(row.created_at * 1000) | dateFormat }}
+          </template>
+          <template slot="empty">
+            <div class="avue-empty__image" style="height: 50px">
+              <img
+                src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNDEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMCAxKSIgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj4KICAgIDxlbGxpcHNlIGZpbGw9IiNGNUY1RjUiIGN4PSIzMiIgY3k9IjMzIiByeD0iMzIiIHJ5PSI3Ii8+CiAgICA8ZyBmaWxsLXJ1bGU9Im5vbnplcm8iIHN0cm9rZT0iI0Q5RDlEOSI+CiAgICAgIDxwYXRoIGQ9Ik01NSAxMi43Nkw0NC44NTQgMS4yNThDNDQuMzY3LjQ3NCA0My42NTYgMCA0Mi45MDcgMEgyMS4wOTNjLS43NDkgMC0xLjQ2LjQ3NC0xLjk0NyAxLjI1N0w5IDEyLjc2MVYyMmg0NnYtOS4yNHoiLz4KICAgICAgPHBhdGggZD0iTTQxLjYxMyAxNS45MzFjMC0xLjYwNS45OTQtMi45MyAyLjIyNy0yLjkzMUg1NXYxOC4xMzdDNTUgMzMuMjYgNTMuNjggMzUgNTIuMDUgMzVoLTQwLjFDMTAuMzIgMzUgOSAzMy4yNTkgOSAzMS4xMzdWMTNoMTEuMTZjMS4yMzMgMCAyLjIyNyAxLjMyMyAyLjIyNyAyLjkyOHYuMDIyYzAgMS42MDUgMS4wMDUgMi45MDEgMi4yMzcgMi45MDFoMTQuNzUyYzEuMjMyIDAgMi4yMzctMS4zMDggMi4yMzctMi45MTN2LS4wMDd6IiBmaWxsPSIjRkFGQUZBIi8+CiAgICA8L2c+CiAgPC9nPgo8L3N2Zz4K"
+                alt=""
+              />
+            </div>
+            <h3>
+              <el-button
+                icon="el-icon-plus"
+                type="text"
+                @click="handleGrade({})"
+                ><strong>新增{{ entityName }}</strong></el-button
+              >
+            </h3></template
+          >
+          <template slot-scope="scope" slot="menu">
+            <el-button
+              v-if="permission.upstream_update || isDevProfile"
+              icon="el-icon-edit"
+              size="small"
+              type="text"
+              @click="handleGrade(scope.row, scope.$index)"
+              >编辑</el-button
+            >
+            <el-button
+              v-if="
+                !permission.upstream_update && !isDevProfile && !isProdProfile
+              "
+              icon="el-icon-edit"
+              size="small"
+              @click="handleTargetsGrade(scope.row, scope.$index)"
+              type="text"
+              >配置Targets</el-button
+            >
+            <el-button
+              v-if="permission.upstream_delete || isDevProfile"
+              icon="el-icon-delete"
+              @click="handleDel(scope.row, scope.$index)"
+              size="small"
+              type="text"
+              >删除</el-button
+            >
+          </template>
+        </avue-crud>
+      </div>
+      <div v-if="pathKey === entityName + '_' + mode">
+        <uphold-upstream
+          :upstream="form"
+          @callback="callback"
+          :mode="mode"
+        ></uphold-upstream>
+      </div>
+
+      <div v-if="pathKey === entityName + '_edit_targets'">
+        <uphold-targets
+          :upstream="form"
+          @callback="callback"
+          :mode="mode"
+        ></uphold-targets>
+      </div>
     </basic-container>
   </div>
 </template>
 <script>
-import { upstreamOption, upstreamColumn } from "@/const/table/gatewayOption";
+import { get_options } from "@/const/table/gatewayOption";
 import { mapGetters } from "vuex";
+import { DIC } from "@/const/dic";
 import targets from "./targets";
-import healthCheck from "./healthCheck";
+import healthCheck from "./activeHealthCheck";
 import upholdUpstream from "./upholdUpstream";
 import upholdTargets from "./upholdTargets";
 import searchBanner from "@/components/searchBanner";
+import InnerBreadcrumb from "@/components/InnerBreadcrumb";
+import CopyItem from "@/components/CopyItem";
 import { findAll, upstreamDel } from "@/api/gateway/upstream";
 export default {
   components: {
     targets,
     searchBanner,
+    InnerBreadcrumb,
+    CopyItem,
     healthCheck,
     upholdUpstream,
     upholdTargets,
   },
-  name: "strategy",
+  name: DIC.UPSTREAMS,
   data() {
     return {
       tableSearch: {},
-      tableOption: upstreamOption, //表格设置属性
-      upstreamColumn: upstreamColumn,
+      tableOption: [], //表格设置属性
       searchProps: [{ name: "name" }],
       form: {},
       tableData: [], //表格的数据
@@ -184,11 +167,30 @@ export default {
         pageSize: 10, //每页显示多少条
       },
       mode: "add",
-      grade: {
-        box: false,
-        targetBox: false,
-        updateUpstream: false,
-        drawerDetail: false,
+      pathKey: DIC.UPSTREAMS,
+      entityName: DIC.UPSTREAMS,
+      labelArgs: {},
+      path: {
+        label: DIC.UPSTREAMS,
+        key: DIC.UPSTREAMS,
+        children: [
+          {
+            key: DIC.UPSTREAMS + "_add",
+            label: "新建" + DIC.UPSTREAMS,
+          },
+          {
+            key: DIC.UPSTREAMS + "_edit",
+            label: "修改" + DIC.UPSTREAMS,
+          },
+          {
+            key: DIC.UPSTREAMS + "_view",
+            label: "查看" + DIC.UPSTREAMS,
+          },
+          {
+            key: DIC.UPSTREAMS + "_edit_targets",
+            label: "配置Targets",
+          },
+        ],
       },
     };
   },
@@ -207,7 +209,10 @@ export default {
         this.$router.push("/wel/index");
       });
     } else {
-      // this.handleList();
+      this.tableOption = get_options(
+        this.systemProfile.version,
+        this.entityName
+      );
       this.initOptions();
     }
   },
@@ -223,28 +228,30 @@ export default {
     },
     toDetail(form) {
       this.form = form;
-      this.grade.drawerDetail = true;
-      this.grade.updateUpstream = true;
+      this.mode = "view";
+      this.pathKey = this.entityName + "_" + this.mode;
     },
     handleGrade(form, index) {
       if (form && form.id) {
         this.form = form;
         this.mode = "edit";
+        this.pathKey = this.entityName + "_" + this.mode;
       } else {
         this.form = {};
         this.mode = "add";
+        this.pathKey = this.entityName + "_" + this.mode;
       }
-      this.grade.box = true;
     },
     handleTargetsGrade(form, index) {
       if (form && form.id) {
         this.form = form;
         this.mode = "edit";
+        this.pathKey = this.entityName + "_edit_targets";
       } else {
         this.form = {};
         this.mode = "add";
+        this.pathKey = this.entityName + "_edit_targets";
       }
-      this.grade.targetBox = true;
     },
     callback(upstream) {
       this.form = upstream;
@@ -283,8 +290,8 @@ export default {
       });
     },
     refreshTableList(refresh) {
-      this.initPage(refresh);
-      this.$refs.routeSearch.refresh(this.page, refresh);
+      // this.initPage(refresh);
+      // this.$refs.routeSearch.refresh(this.page, refresh);
     },
     initPage(refresh) {
       if (!!!refresh) this.tablePage = 1;
@@ -296,8 +303,11 @@ export default {
     },
     //再次加载
     reloadDataList() {
-      this.initPage(false);
-      this.$refs.routeSearch.loadData();
+      this.pathKey = this.entityName;
+      if (this.pathKey == this.entityName) {
+        this.initPage(false);
+        this.$refs.routeSearch.loadData();
+      }
     },
     /**
      * @title 数据添加
@@ -310,7 +320,6 @@ export default {
         done();
         // this.grade.box = false;
         this.form = res.data;
-        this.grade.updateUpstream = true;
         this.reloadDataList();
       });
     },

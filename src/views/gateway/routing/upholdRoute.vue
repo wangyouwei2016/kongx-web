@@ -2,10 +2,23 @@
   <div>
     <el-tabs ref="upstreamTabs" :tab-position="tabPosition">
       <el-tab-pane label="基本信息" ref="targetTab">
-        <span slot="label">
-          <i class="el-icon-info"></i> 基本信息
-        </span>
-        <avue-form :option="routeColumn" ref="routeForm" v-model="targetForm" @submit="handleRoute">
+        <span slot="label"> <i class="el-icon-info"></i> 基本信息 </span>
+        <avue-form
+          :option="routeColumn"
+          ref="routeForm"
+          v-model="targetForm"
+          @submit="handleRoute"
+        >
+          <template slot="service">
+            <select-entity
+              @bind="bindTags"
+              :value="targetForm.service.id"
+              column="service"
+              :dic="services"
+              :props="{ label: 'name', value: 'id' }"
+            >
+            </select-entity>
+          </template>
           <template slot="hosts">
             <item-tags
               :tags="targetForm.hosts"
@@ -33,13 +46,29 @@
               :mode="mode"
             ></item-tags>
           </template>
-          <template slot="menuForm" v-if="mode!='view'">
-            <el-button type="primary" class="el-icon-check" @click="handlerSubmit">提 交</el-button>
-            <el-button @click="handleEmpty" class="el-icon-delete">清 空</el-button>
+          <template slot="tags">
+            <item-tags
+              :tags="targetForm.tags"
+              @sendTag="bindTags"
+              name="请求方法"
+              column="tags"
+              :mode="mode"
+            ></item-tags>
+          </template>
+          <template slot="menuForm" v-if="mode != 'view'">
+            <el-button
+              type="primary"
+              class="el-icon-check"
+              @click="handlerSubmit"
+              >提 交</el-button
+            >
+            <el-button @click="handleEmpty" class="el-icon-delete"
+              >清 空</el-button
+            >
           </template>
         </avue-form>
       </el-tab-pane>
-      <el-tab-pane label=" 路由插件" ref="targetTab" v-if="mode!='add'">
+      <el-tab-pane label=" 路由插件" ref="targetTab" v-if="mode != 'add'">
         <span slot="label">
           <i class="el-icon-success"></i>
           路由插件
@@ -50,9 +79,13 @@
   </div>
 </template>
 <script>
-import { routeColumn } from "@/const/table/gatewayOption";
+import { mapGetters } from "vuex";
+import { get_columns } from "@/const/table/gatewayColumnOption";
+import { DIC } from "@/const/dic";
 import { routeSave, routeUpdate } from "@/api/gateway/route";
+import { findAll } from "@/api/gateway/service";
 import ItemTags from "@/components/ItemTags";
+import SelectEntity from "@/components/SelectEntity";
 import listPlugin from "@/views/gateway/plugin/listPlugin";
 import queryPlugins from "@/views/gateway/plugin/queryPlugins";
 export default {
@@ -61,14 +94,20 @@ export default {
     ItemTags,
     listPlugin,
     queryPlugins,
+    SelectEntity,
   },
   data() {
     return {
-      routeColumn: routeColumn,
+      routeColumn: [],
       tabPosition: "top",
+      name: DIC.ROUTES,
       targetForm: { paths: [], hosts: [], methods: [] },
+      services: [],
       routeData: [],
     };
+  },
+  computed: {
+    ...mapGetters(["permission", "systemProfile", "kongClient"]),
   },
   props: {
     route: { type: Object, required: false },
@@ -77,7 +116,12 @@ export default {
     },
   },
   created() {
+    let version = this.kongClient.version;
+    this.routeColumn = get_columns(version, DIC.ROUTES);
     this.initOptions();
+    findAll().then((res) => {
+      this.services = res.data.data;
+    });
     this.targetForm = _.cloneDeep(this.route);
     delete this.targetForm["serviceName"];
   },

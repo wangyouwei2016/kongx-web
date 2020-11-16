@@ -9,6 +9,7 @@
           clearable
           v-model="searchForm"
           :placeholder="placeholder"
+          size="small"
           class="input-with-select"
         >
           <span

@@ -3,22 +3,35 @@
     <el-tabs type="border-card" :tab-position="tabPosition">
       <el-tab-pane
         lazy
-        v-for="(item) in pluginGroupOption.column"
+        v-for="item in pluginGroupOption.column"
         :key="item.label"
         :label="item.label"
       >
-        <avue-card :option="cardoption" :data="item.option.column" @row-click="tip" @row-add="tip">
+        <avue-card
+          :option="cardoption"
+          :data="item.option.column"
+          @row-click="tip"
+          @row-add="tip"
+        >
           <template slot="menu" slot-scope="scope">
-            <span @click="toAddPlugin(scope.row.name)" type="primary">新增插件</span>
+            <span
+              @click="toAddPlugin(scope.row.name.toLowerCase())"
+              type="primary"
+              >新增插件</span
+            >
           </template>
         </avue-card>
       </el-tab-pane>
     </el-tabs>
-    <el-dialog title="新增插件" width="70%" :visible.sync="grade.pluginBox" append-to-body>
+    <el-dialog
+      title="新增插件"
+      width="70%"
+      :visible.sync="grade.pluginBox"
+      append-to-body
+    >
       <uphold-plugins
         :plugin="plugin"
         @callback="callback"
-        v-if="grade.pluginBox"
         :fields="fields"
         edit="add"
         :key="plugin.name"
@@ -56,11 +69,20 @@
   /* float: right; */
   float: right;
 }
+.avue-card__avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-right: 12px;
+}
 </style>
 <script>
 import { mapGetters } from "vuex";
+import { get_columns } from "@/const/table/gatewayColumnOption";
+import { DIC } from "@/const/dic";
 import { findPluginSchema } from "@/api/gateway/plugins";
-import { pluginGroupOption, pluginOption } from "@/const/pluginsOption";
+import { pluginGroupOption } from "@/const/table/pluginsOption";
 import { findInfo, findStatus } from "@/api/gateway/kongInfo";
 import upholdPlugins from "./upholdPlugins";
 export default {
@@ -68,14 +90,15 @@ export default {
   data() {
     return {
       svgimage: 'this.src="/img/plugins/kong.svg"',
-      pluginGroupOption: pluginGroupOption,
+      pluginGroupOption: [],
       fields: [],
       grade: {
         pluginBox: false,
       },
+      entityName: DIC.PLUGINS,
       cardoption: {
         addBtn: false,
-        span: 8,
+        span: 6,
         props: {
           img: "img",
           title: "name",
@@ -86,14 +109,30 @@ export default {
         name: "",
         config: {},
       },
+      consumer_disabled_plugins: {
+        "hmac-auth": true,
+        "basic-auth": true,
+        "key-auth": true,
+        oauth2: true,
+        "ldap-auth": true,
+        session: true,
+        acl: true,
+        cors: true,
+        "bot-detection": true,
+      },
     };
   },
   created() {
+    let version = this.systemProfile.version;
+    this.pluginGroupOption = get_columns(version, this.entityName);
     if (this.route) {
       this.plugin["route"] = { id: this.route.id };
     }
     if (this.service) {
       this.plugin["service"] = { id: this.service.id };
+    }
+    if (this.consumer) {
+      this.plugin["consumer"] = { id: this.consumer.id };
     }
   },
   mounted() {
@@ -105,12 +144,14 @@ export default {
       "isDevProfile",
       "isProdProfile",
       "systemProfile",
+      "kongClient",
     ]),
   },
   props: {
     tabPosition: { required: false },
     service: { required: false },
     route: { required: false },
+    consumer: { required: false },
   },
   methods: {
     initOptions() {
@@ -123,7 +164,7 @@ export default {
             let _exists = false;
             this.pluginGroupOption.column.forEach((item) => {
               item.option.column.forEach((_column) => {
-                if (plugin == _column["name"]) {
+                if (plugin == _column["name"].toLowerCase()) {
                   _exists = true;
                 }
               });
@@ -153,14 +194,32 @@ export default {
             _customPlugins.option.column = _columns;
             this.pluginGroupOption.column.push(_customPlugins);
           }
+
+          this.pluginGroupOption.column.forEach((item) => {
+            let columns = [];
+            item.option.column.forEach((_column) => {
+              if (!this.disabledPlugins(_column.name.toLowerCase())) {
+                columns.push(_column);
+              }
+            });
+            item.option.column = columns;
+          });
         });
     },
+
+    disabledPlugins(plugin) {
+      if (!!!this.consumer) return false;
+      let exists = this.consumer_disabled_plugins[plugin];
+      return exists;
+    },
+
     toAddPlugin(name) {
       this.plugin = {
         name: "",
         config: {},
         service: this.service,
         route: this.route,
+        consumer: this.consumer,
       };
       this.plugin.name = name;
       findPluginSchema(this.plugin.name).then((res) => {

@@ -4,6 +4,8 @@ function pluralize(time, label) {
     }
     return time + label + 's'
 }
+
+
 /**
  * 日期格式化
  */

@@ -1,12 +1,17 @@
 <template>
   <div>
-    <el-steps :active="step" finish-status="success" simple style="margin-top: 20px">
+    <el-steps
+      :active="step"
+      finish-status="success"
+      simple
+      style="margin-top: 20px"
+    >
       <el-step title="选择同步的服务"></el-step>
       <el-step title="选择同步的环境"></el-step>
       <el-step title="确认后，开始同步"></el-step>
     </el-steps>
-    <div v-show="step==0">
-      <el-row style="margin-top: 12px;">
+    <div v-show="step == 0">
+      <el-row style="margin-top: 12px">
         <el-col span="22">
           <el-input
             prefix-icon="el-icon-search"
@@ -16,7 +21,13 @@
           ></el-input>
         </el-col>
         <el-col span="2">
-          <el-button style="margin-left: 12px;" @click="next(1)" type="primary" size="mini">下一步</el-button>
+          <el-button
+            style="margin-left: 12px"
+            @click="next(1)"
+            type="primary"
+            size="mini"
+            >下一步</el-button
+          >
         </el-col>
       </el-row>
       <avue-crud
@@ -28,16 +39,32 @@
         @selection-change="selectionChange"
         @search-change="handleServiceSearchChange"
         key="service"
-      ></avue-crud>
+      >
+        <template slot-scope="{ row }" slot="created_at">
+          {{ new Date(row.created_at * 1000) | dateFormat }}
+        </template>
+      </avue-crud>
     </div>
     <!--第二步设置的内容 -->
-    <div v-show="step==1">
-      <el-row style="margin-top: 12px;">
+    <div v-show="step == 1">
+      <el-row style="margin-top: 12px">
         <el-col span="22">
-          <el-button style="margin-left: 12px;" @click="previous(0)" type="primary" size="mini">上一步</el-button>
+          <el-button
+            style="margin-left: 12px"
+            @click="previous(0)"
+            type="primary"
+            size="mini"
+            >上一步</el-button
+          >
         </el-col>
         <el-col span="2">
-          <el-button style="margin-left: 12px;" @click="next(2)" type="primary" size="mini">下一步</el-button>
+          <el-button
+            style="margin-left: 12px"
+            @click="next(2)"
+            type="primary"
+            size="mini"
+            >下一步</el-button
+          >
         </el-col>
       </el-row>
       <avue-crud
@@ -51,54 +78,67 @@
       ></avue-crud>
     </div>
     <!--第三步设置的内容 -->
-    <div v-show="step==2">
-      <el-row style="margin-top: 12px;">
+    <div v-show="step == 2">
+      <el-row style="margin-top: 12px">
         <el-col span="22">
-          <el-button style="margin-left: 12px;" @click="previous(1)" type="primary" size="mini">上一步</el-button>
+          <el-button
+            style="margin-left: 12px"
+            @click="previous(1)"
+            type="primary"
+            size="mini"
+            >上一步</el-button
+          >
         </el-col>
         <el-col span="2"></el-col>
       </el-row>
 
-      <el-row style="margin-top: 12px;">
+      <el-row style="margin-top: 12px">
         <el-card>
           <div slot="header" class="clearfix">
             <span>
               <i class="el-icon-info"></i>
-              <strong>同步信息(请确认后，点击'开始同步')</strong>
+              <strong
+                >同步信息(请确认后，点击'开始同步'，默认会自动同步snis、consumers及certificates)</strong
+              >
               <el-button
-                style="margin-left: 12px;margin-bottom:12px;"
+                style="margin-left: 12px; margin-bottom: 12px"
                 @click="next(3)"
                 type="primary"
                 size="mini"
-                v-show="syncForm.status=='ready'"
-              >开始同步</el-button>
+                v-show="syncForm.status == 'ready'"
+                >开始同步</el-button
+              >
               <el-button
-                style="margin-left: 12px;margin-bottom:12px;"
+                style="margin-left: 12px; margin-bottom: 12px"
                 @click="emitSyncDiff"
                 type="success"
                 size="mini"
-              >同步差异比对</el-button>
+                >配置差异比对</el-button
+              >
               <el-button
-                style="margin-left: 12px;margin-bottom:12px;"
+                style="margin-left: 12px; margin-bottom: 12px"
                 disabled
                 type="info"
                 size="mini"
-                v-show="syncForm.status=='running'"
-              >同步进行中...</el-button>
+                v-show="syncForm.status == 'running'"
+                >同步进行中...</el-button
+              >
               <el-button
-                style="margin-left: 12px;margin-bottom:12px;"
+                style="margin-left: 12px; margin-bottom: 12px"
                 disabled
                 type="success"
                 size="mini"
-                v-show="syncForm.status=='success'"
-              >同步成功</el-button>
+                v-show="syncForm.status == 'success'"
+                >同步成功</el-button
+              >
               <el-button
-                style="margin-left: 12px;margin-bottom:12px;"
+                style="margin-left: 12px; margin-bottom: 12px"
                 disabled
                 type="danger"
                 size="mini"
-                v-show="syncForm.status=='failure'"
-              >同步失败</el-button>
+                v-show="syncForm.status == 'failure'"
+                >同步失败</el-button
+              >
             </span>
           </div>
           <div>
@@ -109,9 +149,10 @@
               :disable-transitions="false"
               closable
               @close="handleClientRowClick(tag)"
-            >{{tag.url}}</el-tag>
+              >{{ tag.url }}</el-tag
+            >
           </div>
-          <div style="margin-top: 12px;">
+          <div style="margin-top: 12px">
             同步的服务列表：
             <el-tag
               v-for="tag in syncForm.services"
@@ -119,7 +160,8 @@
               :disable-transitions="false"
               closable
               @close="handleServiceRowClick(tag)"
-            >{{tag.name}}</el-tag>
+              >{{ tag.name }}</el-tag
+            >
           </div>
           <div>
             数据类型：
@@ -127,24 +169,25 @@
               <el-radio label="services">同步服务</el-radio>
               <el-radio label="routes">同步路由</el-radio>
               <el-radio label="plugins">同步插件</el-radio>
-              <!-- <el-radio label="plugins">同步插件(包含全局插件)</el-radio> -->
               <el-radio label="upstreams">同步上游代理</el-radio>
             </el-radio-group>
           </div>
           <div>
             同步策略：
             <el-radio-group v-model="syncForm.policy">
-              <el-radio label="create_update">更新同步(存在就更新，不存在就新增)</el-radio>
+              <el-radio label="create_update"
+                >更新同步(存在就更新，不存在就新增)</el-radio
+              >
               <el-radio label="over_ridden" disabled>覆盖同步</el-radio>
             </el-radio-group>
           </div>
         </el-card>
       </el-row>
-      <el-row style="margin-top: 12px;" v-if="showDiff">
+      <el-row style="margin-top: 12px" v-if="showDiff">
         <el-card>
           <div slot="header" class="clearfix">
             <span>
-              <strong>同步差异比对</strong>
+              <strong>配置差异比对</strong>
             </span>
           </div>
           <div>
@@ -152,22 +195,23 @@
           </div>
         </el-card>
       </el-row>
-      <el-row style="margin-top: 12px;">
+      <el-row style="margin-top: 12px">
         <el-card>
           <div slot="header" class="clearfix">
             <span>
               <strong>同步日志</strong>
             </span>
           </div>
-          <div style="margin-top: 12px;">
+          <div style="margin-top: 12px">
             <el-timeline>
               <el-timeline-item
                 v-for="(activity, index) in logData"
                 :key="index"
-                :size="index==0?'large':'normal'"
-                :color="activity.status=='success'?'#0bbd87':'red'"
-                :timestamp="activity.create_at|parseTime"
-              >{{index+1}}. {{activity.comment}}</el-timeline-item>
+                :size="index == 0 ? 'large' : 'normal'"
+                :color="activity.status == 'success' ? '#0bbd87' : 'red'"
+                :timestamp="activity.create_at | parseTime"
+                >{{ index + 1 }}. {{ activity.comment }}</el-timeline-item
+              >
             </el-timeline>
           </div>
         </el-card>
@@ -197,7 +241,7 @@ export default {
         index: true,
         selection: true,
         simplePage: true,
-        border: true,
+        stripe: true,
         menu: false,
         labelWidth: 120,
         searchBtn: false,
@@ -223,12 +267,9 @@ export default {
             search: false,
             searchFilterable: true,
             searchMmultiple: true,
-            searchFilterMethod: function (value, row, column) {
-              console.log(value, ",", row, ",", column);
-            },
           },
           {
-            label: "HOST OR UPSTREAM",
+            label: "Host",
             prop: "host",
           },
           {
@@ -236,11 +277,7 @@ export default {
             prop: "created_at",
             sortable: true,
             type: "datetime",
-            format: "yyyy-MM-dd HH:mm:ss",
-            valueFormat: "yyyy-MM-dd HH:mm:ss",
-            formatter: (row, value, label, column) => {
-              return value * 1000;
-            },
+            slot: true,
           },
         ],
       },
@@ -249,7 +286,7 @@ export default {
         index: true,
         simplePage: true,
         selection: true,
-        border: true,
+        stripe: true,
         menu: false,
         labelWidth: 120,
         searchBtn: false,
@@ -269,26 +306,22 @@ export default {
         searchSize: "mini",
         column: [
           {
-            label: "服务名称",
+            label: "Kong Admin Url",
+            prop: "url",
+          },
+          {
+            label: "Kong Version",
+            prop: "version",
+          },
+          {
+            label: "环境名称",
             prop: "name",
             width: 120,
           },
           {
-            label: "URL",
-            prop: "url",
-          },
-          {
-            label: "环境",
+            label: "环境编码",
             prop: "profile",
             width: 120,
-          },
-          {
-            label: "创建日期",
-            prop: "create_at",
-            sortable: true,
-            type: "datetime",
-            format: "yyyy-MM-dd HH:mm:ss",
-            valueFormat: "yyyy-MM-dd HH:mm:ss",
           },
         ],
       },
@@ -363,26 +396,33 @@ export default {
           }
           findAllClient().then((res) => {
             var results = res.data.data;
+            this.clientData = [];
             for (var i = 0; i < results.length; i++) {
-              if (results[i] && "prod" !== results[i].profile) {
-                this.clientData.push(results[i]);
+              let _client = results[i];
+              if (
+                _client &&
+                "prod" !== _client.profile &&
+                _client.id != this.systemProfile.id
+                // &&_client.version == this.systemProfile.version
+              ) {
+                this.clientData.push(_client);
               }
             }
           });
           break;
         case 2:
           if (this.syncForm.clients && this.syncForm.clients.length == 0) {
-            this.$errorInfo("请先选择需要同步的环境");
+            this.$errorInfo("请选择需要同步的环境");
             return;
           }
           break;
         case 3:
           if (this.syncForm.services && this.syncForm.services.length == 0) {
-            this.$errorInfo("请先选择需要同步的服务");
+            this.$errorInfo("请选择需要同步的服务");
             return;
           }
           if (this.syncForm.clients && this.syncForm.clients.length == 0) {
-            this.$errorInfo("请先选择需要同步的环境");
+            this.$errorInfo("请选择需要同步的环境");
             return;
           }
           this.syncForm.status = "running";

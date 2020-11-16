@@ -1,148 +1,161 @@
 <template>
   <div>
+    <basic-container v-if="pathKey != entityName">
+      <div>
+        <inner-breadcrumb
+          v-model="pathKey"
+          showBack="true"
+          :path="path"
+          :labelArgs="labelArgs"
+        ></inner-breadcrumb>
+      </div>
+    </basic-container>
     <basic-container>
-      <search-banner
-        ref="routeSearch"
-        :span="permission.plugin_add || isDevProfile ? 21 : 24"
-        placeholder="请输入插件名称、服务名称或路由名称"
-        :handleList="handleList"
-        :searchProps="searchProps"
-        :page="page"
-        @search-change="searchChange"
-      >
-        <template slot="menu">
-          <el-button
-            v-if="permission.plugin_add || isDevProfile"
-            icon="el-icon-plus"
-            size="small"
-            @click="handleGrade({})"
-            type="primary"
-            >新增全局插件</el-button
+      <div v-if="pathKey == entityName">
+        <search-banner
+          ref="routeSearch"
+          :span="permission.plugin_add || isDevProfile ? 21 : 24"
+          placeholder="请输入插件名称、服务名称或路由名称"
+          :handleList="handleList"
+          :searchProps="searchProps"
+          :page="page"
+          @search-change="searchChange"
+        >
+          <template slot="menu">
+            <el-button
+              v-if="permission.plugin_add || isDevProfile"
+              icon="el-icon-plus"
+              size="small"
+              @click="handleGrade({})"
+              type="primary"
+              >新增全局插件</el-button
+            >
+          </template>
+        </search-banner>
+        <avue-crud
+          :option="tableOption"
+          :data="tableData"
+          :table-loading="tableLoading"
+          :page="page"
+          @row-click="handleRowClick"
+          @row-save="handleSave"
+          @row-del="handleDel"
+          @current-change="handleCurrentChange"
+          @size-change="handleCurrentSize"
+        >
+          <template slot-scope="{ row }" slot="created_at">
+            {{ new Date(row.created_at * 1000) | dateFormat }}
+          </template>
+          <template slot="empty">
+            <div class="avue-empty__image" style="height: 50px">
+              <img
+                src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNDEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMCAxKSIgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj4KICAgIDxlbGxpcHNlIGZpbGw9IiNGNUY1RjUiIGN4PSIzMiIgY3k9IjMzIiByeD0iMzIiIHJ5PSI3Ii8+CiAgICA8ZyBmaWxsLXJ1bGU9Im5vbnplcm8iIHN0cm9rZT0iI0Q5RDlEOSI+CiAgICAgIDxwYXRoIGQ9Ik01NSAxMi43Nkw0NC44NTQgMS4yNThDNDQuMzY3LjQ3NCA0My42NTYgMCA0Mi45MDcgMEgyMS4wOTNjLS43NDkgMC0xLjQ2LjQ3NC0xLjk0NyAxLjI1N0w5IDEyLjc2MVYyMmg0NnYtOS4yNHoiLz4KICAgICAgPHBhdGggZD0iTTQxLjYxMyAxNS45MzFjMC0xLjYwNS45OTQtMi45MyAyLjIyNy0yLjkzMUg1NXYxOC4xMzdDNTUgMzMuMjYgNTMuNjggMzUgNTIuMDUgMzVoLTQwLjFDMTAuMzIgMzUgOSAzMy4yNTkgOSAzMS4xMzdWMTNoMTEuMTZjMS4yMzMgMCAyLjIyNyAxLjMyMyAyLjIyNyAyLjkyOHYuMDIyYzAgMS42MDUgMS4wMDUgMi45MDEgMi4yMzcgMi45MDFoMTQuNzUyYzEuMjMyIDAgMi4yMzctMS4zMDggMi4yMzctMi45MTN2LS4wMDd6IiBmaWxsPSIjRkFGQUZBIi8+CiAgICA8L2c+CiAgPC9nPgo8L3N2Zz4K"
+                alt=""
+              />
+            </div>
+            <h3>
+              <el-button
+                icon="el-icon-plus"
+                type="text"
+                @click="handleGrade({})"
+                ><strong>新增{{ entityName }}</strong></el-button
+              >
+            </h3></template
           >
-        </template>
-      </search-banner>
-      <avue-crud
-        :option="tableOption"
-        :data="tableData"
-        :table-loading="tableLoading"
-        :page="page"
-        @row-click="handleRowClick"
-        @row-save="handleSave"
-        @row-del="handleDel"
-        @current-change="handleCurrentChange"
-        @size-change="handleCurrentSize"
-      >
-        <template slot-scope="scope" slot="menuLeft"></template>
-        <template slot="enabled" slot-scope="{ row }">
-          <el-button
-            v-show="row.enabled"
-            plain
-            size="mini"
-            type="success"
-            v-if="permission.plugin_update"
-            @click="handlerPluginUpdate(row, false)"
-            >启用</el-button
-          >
-          <el-button
-            v-show="!row.enabled"
-            plain
-            size="mini"
-            type="danger"
-            v-if="permission.plugin_update"
-            @click="handlerPluginUpdate(row, true)"
-            >未启用</el-button
-          >
-          <el-button
-            v-show="row.enabled"
-            plain
-            size="mini"
-            type="success"
-            disabled
-            v-if="!permission.plugin_update"
-            >启用</el-button
-          >
-          <el-button
-            v-show="!row.enabled"
-            plain
-            size="mini"
-            type="danger"
-            disabled
-            v-if="!permission.plugin_update"
-            >未启用</el-button
-          >
-        </template>
-        <template slot="name" slot-scope="{ row }">
-          <el-link
-            :underline="false"
-            type="success"
-            @click="toDetailPlugin(row)"
-            >{{ row.name }}</el-link
-          >
-        </template>
-        <template slot-scope="scope" slot="menu">
-          <el-button
-            v-if="permission.plugin_update || isDevProfile"
-            icon="el-icon-edit"
-            size="small"
-            @click="toEditPlugin(scope.row, scope.$index)"
-            type="text"
-            >编辑</el-button
-          >
-          <el-button
-            v-if="permission.plugin_delete || isDevProfile"
-            icon="el-icon-delete"
-            size="small"
-            @click="handleDel(scope.row, scope.$index)"
-            type="text"
-            >删除</el-button
-          >
-        </template>
-      </avue-crud>
-      <el-dialog
-        title="编辑插件"
-        width="70%"
-        :visible.sync="grade.pluginBox"
-        v-if="grade.pluginBox"
-      >
+          <template slot="id" slot-scope="{ row }">
+            <copy-item :value="row.id"></copy-item>
+          </template>
+          <template slot="consumer" slot-scope="{ row }">
+            <div v-if="row.consumer">
+              <copy-item :value="row.consumer.id"></copy-item>
+            </div>
+            <div v-if="!row.consumer">All Consumers</div>
+          </template>
+          <template slot="enabled" slot-scope="{ row }">
+            <el-button
+              v-show="row.enabled"
+              plain
+              size="mini"
+              type="success"
+              v-if="permission.plugin_update"
+              @click="handlerPluginUpdate(row, false)"
+              >启用</el-button
+            >
+            <el-button
+              v-show="!row.enabled"
+              plain
+              size="mini"
+              type="danger"
+              v-if="permission.plugin_update"
+              @click="handlerPluginUpdate(row, true)"
+              >未启用</el-button
+            >
+            <el-button
+              v-show="row.enabled"
+              plain
+              size="mini"
+              type="success"
+              disabled
+              v-if="!permission.plugin_update"
+              >启用</el-button
+            >
+            <el-button
+              v-show="!row.enabled"
+              plain
+              size="mini"
+              type="danger"
+              disabled
+              v-if="!permission.plugin_update"
+              >未启用</el-button
+            >
+          </template>
+          <template slot="name" slot-scope="{ row }">
+            <el-link
+              :underline="false"
+              type="success"
+              @click="toDetailPlugin(row)"
+              >{{ row.name }}</el-link
+            >
+          </template>
+          <template slot-scope="scope" slot="menu">
+            <el-button
+              v-if="permission.plugin_update || isDevProfile"
+              icon="el-icon-edit"
+              size="small"
+              @click="toEditPlugin(scope.row, scope.$index)"
+              type="text"
+              >编辑</el-button
+            >
+            <el-button
+              v-if="permission.plugin_delete || isDevProfile"
+              icon="el-icon-delete"
+              size="small"
+              @click="handleDel(scope.row, scope.$index)"
+              type="text"
+              >删除</el-button
+            >
+          </template>
+        </avue-crud>
+      </div>
+      <div v-if="pathKey == entityName + '_edit'">
         <uphold-plugin
           :plugin="plugin"
           @callback="refreshList"
           edit="edit"
           :fields="fields"
         ></uphold-plugin>
-      </el-dialog>
-      <el-dialog
-        title="新增全局插件"
-        width="70%"
-        :visible.sync="grade.box"
-        v-if="grade.box"
-      >
+      </div>
+      <div v-if="pathKey == entityName + '_add'">
         <list-plugin @callback="reloadDataList"></list-plugin>
-      </el-dialog>
-      <el-drawer
-        size="45%"
-        :title="'\'' + plugin.name + '\' 详情'"
-        :visible.sync="grade.drawerDetail"
-        v-if="grade.drawerDetail"
-        :direction="direction"
-        :before-close="handleClose"
-      >
-        <div
-          style="
-            margin-left: 10px;
-            overflow-y: auto;
-            overflow-x: auto;
-            height: 90%;
-          "
-        >
-          <json-viewer
-            :value="plugin"
-            :expand-depth="5"
-            copyable
-            sort
-          ></json-viewer>
-        </div>
-      </el-drawer>
+      </div>
+      <div v-if="pathKey == entityName + '_view'">
+        <json-viewer
+          :value="plugin"
+          :expand-depth="5"
+          copyable
+          sort
+        ></json-viewer>
+      </div>
     </basic-container>
   </div>
 </template>
@@ -169,7 +182,7 @@
 }
 </style>
 <script>
-import { pluginsOption } from "@/const/table/gatewayOption";
+import { get_options } from "@/const/table/gatewayOption";
 import { mapGetters } from "vuex";
 import {
   findAll,
@@ -177,17 +190,26 @@ import {
   pluginUpdate,
   findPluginSchema,
 } from "@/api/gateway/plugins";
+import { DIC } from "@/const/dic.js";
 import { findInfo, findStatus } from "@/api/gateway/kongInfo";
 import listPlugin from "./listPlugin";
 import searchBanner from "@/components/searchBanner";
 import upholdPlugin from "./upholdPlugins";
+import InnerBreadcrumb from "@/components/InnerBreadcrumb";
+import CopyItem from "@/components/CopyItem";
 export default {
   name: "plugin",
-  components: { listPlugin, searchBanner, upholdPlugin },
+  components: {
+    listPlugin,
+    searchBanner,
+    upholdPlugin,
+    CopyItem,
+    InnerBreadcrumb,
+  },
   data() {
     return {
       tableSearch: {},
-      tableOption: pluginsOption, //表格设置属性
+      tableOption: [], //表格设置属性
       searchProps: [
         { name: "name" },
         { name: "applyObject", type: "object", childName: "name" },
@@ -199,15 +221,32 @@ export default {
       tablePage: 1,
       tableSize: 10,
       tableLoading: false,
+      mode: "add",
       page: {
         total: 0, //总页数
         currentPage: 1, //当前页数
         pageSize: 10, //每页显示多少条
       },
-      grade: {
-        box: false,
-        pluginBox: false,
-        drawerDetail: false,
+      pathKey: DIC.PLUGINS,
+      entityName: DIC.PLUGINS,
+      labelArgs: {},
+      path: {
+        label: DIC.PLUGINS,
+        key: DIC.PLUGINS,
+        children: [
+          {
+            key: DIC.PLUGINS + "_add",
+            label: "新建" + DIC.PLUGINS,
+          },
+          {
+            key: DIC.PLUGINS + "_edit",
+            label: "修改" + DIC.PLUGINS,
+          },
+          {
+            key: DIC.PLUGINS + "_view",
+            label: "查看" + DIC.PLUGINS,
+          },
+        ],
       },
     };
   },
@@ -217,6 +256,7 @@ export default {
       "isDevProfile",
       "isProdProfile",
       "systemProfile",
+      "kongClient",
     ]),
   },
   props: {
@@ -231,7 +271,10 @@ export default {
         this.$router.push("/wel/index");
       });
     } else {
-      // this.handleList();
+      this.tableOption = get_options(
+        this.systemProfile.version,
+        this.entityName
+      );
       this.queryInfo();
       this.initOptions();
     }
@@ -253,7 +296,8 @@ export default {
       });
     },
     toDetailPlugin(form, index) {
-      this.grade.drawerDetail = true;
+      this.mode = "view";
+      this.pathKey = this.entityName + "_" + this.mode;
       this.plugin = form;
     },
     toEditPlugin(form, index) {
@@ -261,15 +305,15 @@ export default {
       findPluginSchema(this.plugin.name).then((res) => {
         let _data = res.data;
         this.fields = _data.fields || [];
-        this.grade.pluginBox = true;
+        this.mode = "edit";
+        this.pathKey = this.entityName + "_" + this.mode;
       });
     },
     handleGrade(form, index) {
-      this.grade.box = true;
+      this.mode = "add";
+      this.pathKey = this.entityName + "_" + this.mode;
     },
     refreshList() {
-      this.grade.box = false;
-      this.grade.pluginBox = false;
       this.initPage(true);
       this.$refs.routeSearch.refresh(this.page, true);
     },
@@ -343,7 +387,6 @@ export default {
         } else {
           this.$errorInfo(_data.message);
         }
-        console.log("d");
         this.reloadDataList();
       });
     },

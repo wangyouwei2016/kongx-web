@@ -1,10 +1,10 @@
 <template>
   <div>
-    <div style="margin-bottom:10px;">
-      <el-col span="5"></el-col>启用：
-      <el-switch v-model="plugin.enabled"></el-switch>
-    </div>
-    <avue-form :option="pluginColumn" v-model="pluginForm" @submit="handlePlugin">
+    <avue-form
+      :option="pluginColumn"
+      v-model="pluginForm"
+      @submit="handlePlugin"
+    >
       <template v-for="column in slotColumns" :slot="column.slot">
         <el-col :key="column.slot">
           <el-form-item
@@ -40,29 +40,30 @@ import { serviceRouteOption, routeColumn } from "@/const/table/gatewayOption";
 import {
   findPluginSchema,
   pluginSave,
-  pluginUpdate
+  pluginUpdate,
 } from "@/api/gateway/plugins";
 import ItemTags from "@/components/ItemTags";
+import SelectEntity from "@/components/SelectEntity";
 export default {
   name: "plugin",
-  components: { ItemTags },
+  components: { ItemTags, SelectEntity },
   data() {
     return {
       pluginColumn: { column: [] },
       pluginForm: { enabled: true },
       slotColumns: [],
       tagsColumn: [],
-      config: {}
+      config: {},
     };
   },
   props: {
     plugin: {
       type: Object,
       required: true,
-      config: {}
+      config: {},
     },
     edit: { required: false },
-    fields: { type: Object }
+    fields: { type: Object },
   },
   created() {
     this.pluginForm = this.plugin["config"] || {};
@@ -73,7 +74,7 @@ export default {
       this.config = Object.assign(this.config, data);
     },
     querySchema() {
-      this.fields.forEach(item => {
+      this.fields.forEach((item) => {
         for (var v in item) {
           let _column = this.createColumn(v, item[v]);
           this.pluginColumn.column.push(_column);
@@ -84,13 +85,13 @@ export default {
         let _pluginColumns = { group: [], card: true };
         let defaultGroup = { label: "基本信息", column: [] };
         let _slotGroups = [];
-        this.pluginColumn.column.forEach(_column => {
+        this.pluginColumn.column.forEach((_column) => {
           let exists = false;
-          this.slotColumns.forEach(slotColumn => {
+          this.slotColumns.forEach((slotColumn) => {
             if (slotColumn.slot == _column.prop) {
               exists = true;
               var columns = [];
-              slotColumn.option.column.forEach(itemColumn => {
+              slotColumn.option.column.forEach((itemColumn) => {
                 itemColumn.prop = slotColumn.slot + "_" + itemColumn.prop;
                 itemColumn["type"] == "array" &&
                   this.createTagColumn(itemColumn.prop);
@@ -120,7 +121,7 @@ export default {
               });
               _slotGroups.push({
                 label: slotColumn.slot,
-                column: columns
+                column: columns,
               });
             }
           });
@@ -147,7 +148,7 @@ export default {
         prop: label,
         labelWidth: 220,
         rules: [],
-        value: null
+        value: null,
       };
       _column.value = item["default"];
       let _fields = item["fields"];
@@ -156,7 +157,7 @@ export default {
         let children = { option: { column: [] }, slot: "" };
         children.slot = label;
         children.form = {};
-        _fields.forEach(item => {
+        _fields.forEach((item) => {
           for (var v in item) {
             children.option.column.push(this.createColumn(v, item[v], true));
           }
@@ -176,7 +177,7 @@ export default {
           _column["rules"].push({
             required: item["required"],
             message: "请填写" + label,
-            trigger: "blur"
+            trigger: "blur",
           });
         }
         //获取默认值
@@ -190,7 +191,7 @@ export default {
           _column.type = "select";
 
           var _dics = [];
-          item["one_of"].forEach(label => {
+          item["one_of"].forEach((label) => {
             _dics.push({ label: label, value: label });
           });
           _column.dicData = _dics;
@@ -209,7 +210,7 @@ export default {
         case "array":
           return "Array";
       }
-      return "string";
+      return "";
     },
     handlePlugin(row, done) {
       var _config = {};
@@ -222,9 +223,9 @@ export default {
       console.log(_config);
       this.pluginForm = _config;
       this.plugin.config = Object.assign(this.pluginForm, this.config);
-      this.slotColumns.forEach(parentColumn => {
+      this.slotColumns.forEach((parentColumn) => {
         var _column = parentColumn.slot;
-        parentColumn.option.column.forEach(childColumn => {
+        parentColumn.option.column.forEach((childColumn) => {
           var _columnConfig = this.plugin.config[childColumn.prop];
 
           if (_columnConfig === "" || _columnConfig) {
@@ -242,7 +243,7 @@ export default {
         });
       });
       if (this.edit == "edit") {
-        pluginUpdate(this.plugin).then(res => {
+        pluginUpdate(this.plugin).then((res) => {
           let _data = res.data;
           if (_data.status != 0) {
             this.$errorInfo(_data.errmsg);
@@ -255,7 +256,7 @@ export default {
         });
       } else if (this.edit == "add") {
         this.plugin["enabled"] = true;
-        pluginSave(this.plugin).then(res => {
+        pluginSave(this.plugin).then((res) => {
           let _data = res.data;
           if (_data.status != 0) {
             this.$errorInfo(_data.errmsg);
@@ -271,7 +272,7 @@ export default {
     },
     callback() {
       this.$emit("callback", {});
-    }
-  }
+    },
+  },
 };
 </script>

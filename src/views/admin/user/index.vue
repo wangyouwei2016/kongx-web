@@ -1,14 +1,20 @@
 <template>
   <basic-container>
     <div>
-      <el-row style="margin-bottom: 5px;margin-left:5px;margin-right:5px;">
+      <el-row style="margin-bottom: 5px; margin-left: 5px; margin-right: 5px">
         <el-col span="2">
-          <el-button size="small" icon="el-icon-plus" type="primary" @click="toAdd">新增用户</el-button>
+          <el-button
+            size="small"
+            icon="el-icon-plus"
+            type="primary"
+            @click="toAdd"
+            >新增用户</el-button
+          >
         </el-col>
         <el-col span="2">
           <el-popover placement="right-start" title="用户组" v-model="visible">
             <setting-user-group
-              :userInfo="{userGroupList:[]}"
+              :userInfo="{ userGroupList: [] }"
               :userIds="checkedUsers"
               :mode="mode"
               @callback="handleList"
@@ -20,10 +26,11 @@
               size="small"
               icon="el-icon-plus"
               type="primary"
-            >批量授权</el-button>
+              >批量授权</el-button
+            >
           </el-popover>
         </el-col>
-        <el-col :span="permission.user_authority?20:24">
+        <el-col :span="permission.user_authority ? 20 : 24">
           <el-input
             size="small"
             v-model="searchForm"
@@ -50,9 +57,12 @@
       @size-change="handleCurrentSize"
       @search-change="handleSearchChange"
       @selection-change="selectionChange"
-      style="cursor:pointer;"
+      style="cursor: pointer"
     >
-      <template slot-scope="{row}" slot="userGroupList">
+      <template slot-scope="{ row }" slot="create_at">
+        {{ new Date(row.create_at) | dateFormat }}
+      </template>
+      <template slot-scope="{ row }" slot="userGroupList">
         <setting-user-group
           :key="row.userId"
           :userInfo="row"
@@ -64,28 +74,41 @@
       </template>
       <template slot-scope="scope" slot="menu">
         <el-button
-          @click="toEdit(scope.row,scope.index)"
+          @click="toEdit(scope.row, scope.index)"
           size="small"
           icon="el-icon-edit"
           type="text"
-        >编辑</el-button>
+          >编辑</el-button
+        >
         <el-button
-          @click="toResetpwd(scope.row,scope.index)"
+          @click="toResetpwd(scope.row, scope.index)"
           size="small"
           icon="el-icon-refresh"
           type="text"
-        >重置</el-button>
+          >密码重置</el-button
+        >
       </template>
     </avue-crud>
     <el-drawer
-      :title="mode=='add'?'新增用户':'编辑用户'"
+      :title="mode == 'add' ? '新增用户' : '编辑用户'"
       size="50%"
       :visible.sync="upholdBox"
       v-if="upholdBox"
       :direction="direction"
     >
-      <div style="margin-left:10px;overflow-y:auto; overflow-x:auto;height:90%;">
-        <uphold-user :entity="upholdEntity" :mode="mode" @callback="handleList"></uphold-user>
+      <div
+        style="
+          margin-left: 10px;
+          overflow-y: auto;
+          overflow-x: auto;
+          height: 90%;
+        "
+      >
+        <uphold-user
+          :entity="upholdEntity"
+          :mode="mode"
+          @callback="handleList"
+        ></uphold-user>
       </div>
     </el-drawer>
   </basic-container>

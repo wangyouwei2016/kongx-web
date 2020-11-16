@@ -4,6 +4,7 @@
 export default {
     title: "KONGX",
     path: '',
+    version: '2.0.0',
     logo: "K",
     indexTitle: 'KONGX',
     lockPage: '/lock',

@@ -1,5 +1,5 @@
 <template>
-  <el-popover :placement="placement" title="路由Hosts更新为" v-model="visible">
+  <el-popover :placement="placement" title="Hosts更新为" v-model="visible">
     <div style="margin-top: 20px">
       <item-tags
         :tags="this.routeParms.hosts"
@@ -13,12 +13,17 @@
       icon="el-icon-refresh"
       size="small"
       slot="reference"
-      type="success"
+      type="primary"
       @click="findConfigByKey"
-    >批量更新HOSTS</el-button>
+      >批量更新Hosts</el-button
+    >
     <div style="text-align: right; margin-top: 20px">
-      <el-button size="mini" type="text" @click="visible = false">取消</el-button>
-      <el-button type="primary" size="mini" @click="batchUpdateRouteHosts">确定</el-button>
+      <el-button size="mini" type="text" @click="visible = false"
+        >取消</el-button
+      >
+      <el-button type="primary" size="mini" @click="batchUpdateRouteHosts"
+        >确定</el-button
+      >
     </div>
   </el-popover>
 </template>
@@ -32,21 +37,21 @@ export default {
   data() {
     return {
       visible: false,
-      routeParms: { hosts: [], service: this.service }
+      routeParms: { hosts: [], service: this.service },
     };
   },
   props: {
     service: {
-      required: false
+      required: false,
     },
-    placement: { default: "bottom-start", required: false }
+    placement: { default: "bottom-start", required: false },
   },
   created() {
     this.findConfigByKey();
   },
   methods: {
     findConfigByKey() {
-      findConfigByKey("default_domains").then(res => {
+      findConfigByKey("default_domains").then((res) => {
         var _data = res.data.data;
         var _hosts = JSON.parse(_data.configValue);
         this.routeParms["hosts"] = _hosts;
@@ -57,7 +62,7 @@ export default {
       //     this.$errorInfo("请填写路由Hosts");
       //     return;
       //   }
-      updateRouteHosts(this.routeParms).then(res => {
+      updateRouteHosts(this.routeParms).then((res) => {
         let _data = res.data;
         if (_data.status != 0) {
           this.$errorInfo(_data.errmsg);
@@ -77,7 +82,7 @@ export default {
     },
     callback() {
       this.$emit("callback", {});
-    }
-  }
+    },
+  },
 };
 </script>

@@ -1,7 +1,7 @@
 // 配置编译环境和线上环境之间的切换
 
 let baseUrl = 'http://r.kongx.com:8088/';
-let iconfontVersion = ['567566_qo5lxgtishg', '2106500_kd4gecdu0h'];
+let iconfontVersion = ['567566_qo5lxgtishg', '2106500_7cs4kk59h96'];
 let iconfontUrl = `//at.alicdn.com/t/font_$key.css`;
 let codeUrl = `${baseUrl}/code`
 const env = process.env

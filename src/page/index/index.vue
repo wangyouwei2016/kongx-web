@@ -1,5 +1,5 @@
 <template>
-  <div class="avue-contail" :class="{'avue--collapse':isCollapse}">
+  <div class="avue-contail" :class="{ 'avue--collapse': isCollapse }">
     <div class="avue-header">
       <!-- 顶部导航栏 -->
       <top />
@@ -12,9 +12,9 @@
       </div>
       <div class="avue-main">
         <!-- 顶部标签卡 -->
-        <tags />
+        <tags />{{ showTag }}
         <!-- 主体视图层 -->
-        <el-scrollbar style="height:100%">
+        <el-scrollbar style="height: 100%">
           <keep-alive>
             <router-view class="avue-view" v-if="$route.meta.$keepAlive" />
           </keep-alive>
@@ -22,12 +22,6 @@
         </el-scrollbar>
       </div>
     </div>
-    <!-- <el-footer class="avue-footer">
-      <img src="/svg/logo.svg"
-           alt=""
-           class="logo">
-      <p class="copyright">© 2018 Avue designed by smallwei</p>
-    </el-footer> -->
     <div class="avue-shade" @click="showCollapse"></div>
   </div>
 </template>

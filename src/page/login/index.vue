@@ -6,14 +6,14 @@
       <div>
         <img class="img" src="/svg/logo.png" alt />
       </div>
-      <p class="login-tip">Kongx-网关kong服务管理平台-v1.2.x</p>
+      <p class="login-tip">Kong可视化管理平台-{{ website.version }}</p>
       <div class="login-border">
         <div class="login-main">
           <userLogin v-if="activeName === 'user'"></userLogin>
         </div>
       </div>
       <div class="login-copyright">
-        Copyright © 2020 raoxiaoyan. All rights reserved.
+        Copyright © 2020 onebytes-plus. All rights reserved.
       </div>
     </div>
   </div>

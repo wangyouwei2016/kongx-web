@@ -23,25 +23,37 @@
         <div class="top-bar__item">
           <top-color></top-color>
         </div>
-      </el-tooltip>-->
+      </el-tooltip> -->
       <!-- <el-tooltip effect="dark" :content="logsFlag?'没有错误日志':`${logsLen}条错误日志`" placement="bottom">
         <div class="top-bar__item">
           <top-logs></top-logs>
         </div>
       </el-tooltip>-->
-      <el-tooltip effect="dark" content="锁屏" placement="bottom">
+      <el-tooltip
+        effect="dark"
+        content="锁屏"
+        placement="bottom"
+        v-if="showLock"
+      >
         <div class="top-bar__item">
           <top-lock></top-lock>
         </div>
       </el-tooltip>
-      <el-tooltip effect="dark" content="特色主题" placement="bottom">
+      <el-tooltip
+        effect="dark"
+        content="特色主题"
+        placement="bottom"
+        v-if="showTheme"
+      >
         <div class="top-bar__item top-bar__item--show">
           <top-theme></top-theme>
         </div>
       </el-tooltip>
       <div class="top-bar__item">
         <span style="cursor: pointer">
-          <font size="2">工作台：{{ kongClient.profileCode }}, 切换</font>
+          <font size="2"
+            >工作台：{{ kongClient.name }}/{{ kongClient.version }}, 切换</font
+          >
           <i class="el-icon-arrow-right el-icon--right"></i>
         </span>
         <transfer-client :activeClient="kongClient"></transfer-client>
@@ -50,6 +62,7 @@
         effect="dark"
         :content="isFullScren ? '退出全屏' : '全屏'"
         placement="bottom"
+        v-if="showFullScren"
       >
         <div class="top-bar__item">
           <i
@@ -61,6 +74,7 @@
       <el-tooltip effect="dark" content="用户头像" placement="bottom">
         <img class="top-bar__img" :src="userInfo.avatar" />
       </el-tooltip>
+
       <el-dropdown>
         <span class="el-dropdown-link" style="cursor: pointer">
           {{ userInfo.name }}
@@ -78,6 +92,9 @@
           >
         </el-dropdown-menu>
       </el-dropdown>
+      <el-tooltip effect="dark" content="系统设置" placement="bottom">
+        <top-setting></top-setting>
+      </el-tooltip>
     </div>
   </div>
 </template>

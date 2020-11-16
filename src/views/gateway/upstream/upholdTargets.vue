@@ -2,46 +2,59 @@
   <div>
     <el-tabs @tab-click="checkUpstream" ref="upstreamTabs" value="targets">
       <el-tab-pane>
-        <span slot="label">
-          <i class="el-icon-info"></i> 基本信息
-        </span>
-        <avue-form :option="upstreamColumn" ref="form" v-model="upstream" @submit="handleSave"></avue-form>
+        <span slot="label"> <i class="el-icon-info"></i> 基本信息 </span>
+        <avue-form
+          :option="upstreamColumn"
+          ref="form"
+          v-model="upstream"
+          @submit="handleSave"
+        ></avue-form>
       </el-tab-pane>
-      <el-tab-pane label="代理列表" v-if="mode!='add'" name="targets">
-        <span slot="label">
-          <i class="el-icon-success"></i> Targets
-        </span>
+      <el-tab-pane label="代理列表" v-if="mode != 'add'" name="targets">
+        <span slot="label"> <i class="el-icon-success"></i> Targets </span>
         <targets :upstream="upstreamEntity" ref="targets" mode="edit"></targets>
       </el-tab-pane>
-      <el-tab-pane label="设置健康检查" v-if="mode!='add'">
+      <el-tab-pane label="设置健康检查" v-if="mode != 'add'" lazy>
         <span slot="label">
-          <i class="el-icon-warning"></i>  健康检查(ACTIVE)
+          <i class="icon-healthactive"></i> 主动健康检查(Active)
         </span>
-        <health-check :upstream="upstreamEntity" mode="view"></health-check>
+        <active-health-check
+          :upstream="upstream"
+          :mode="mode"
+        ></active-health-check>
+      </el-tab-pane>
+      <el-tab-pane label="设置健康检查" v-if="mode != 'add'" lazy>
+        <span slot="label">
+          <i class="icon-jiankangjiancha"></i> 被动健康检查(Passive)
+        </span>
+        <passive-health-check
+          :upstream="upstream"
+          :mode="mode"
+        ></passive-health-check>
       </el-tab-pane>
     </el-tabs>
   </div>
 </template>
 <script>
 import { mapGetters } from "vuex";
-import { upstreamColumn } from "@/const/table/gatewayOption";
 import targets from "./targets";
-import healthCheck from "./healthCheck";
+import activeHealthCheck from "./activeHealthCheck";
+import { DIC } from "@/const/dic";
 import { upstreamUpdate, upstreamSave } from "@/api/gateway/upstream";
 export default {
   components: {
     targets,
-    healthCheck,
+    activeHealthCheck,
   },
   name: "upholdUpstream",
   data() {
     return {
-      upstreamColumn: upstreamColumn,
+      upstreamColumn: [],
       upstreamEntity: _.cloneDeep(this.upstream),
     };
   },
   computed: {
-    ...mapGetters(["permission", "systemProfile"]),
+    ...mapGetters(["permission", "systemProfile", "kongClient"]),
   },
   props: {
     upstream: {
@@ -51,6 +64,8 @@ export default {
     mode: { required: false },
   },
   created() {
+    let version = this.kongClient.version;
+    this.upstreamColumn = get_columns(version, DIC.UPSTREAMS);
     this.initOptions();
   },
   methods: {
