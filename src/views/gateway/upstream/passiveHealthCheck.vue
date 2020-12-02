@@ -42,7 +42,7 @@ export default {
   components: { ItemTags },
   data() {
     return {
-      passiveHealthCheckOption: passiveHealthCheckOption,
+      passiveHealthCheckOption: _.cloneDeep(passiveHealthCheckOption),
       passiveHealthForm: {
         http_statuses: [
           200,
@@ -75,16 +75,20 @@ export default {
       required: false,
     },
     mode: { required: true },
+    type: {},
   },
   created() {
-    this.initform(this.upstream);
     this.initOptions();
+    this.initform(this.upstream);
   },
   methods: {
     initOptions() {
       this.passiveHealthCheckOption.column.forEach((column) => {
         column["disabled"] = this.mode == "view";
       });
+      if (this.type && this.type == "drawer") {
+        this.passiveHealthCheckOption["gutter"] = 0;
+      }
     },
     bindTags(data) {
       this.passiveHealthForm = Object.assign(this.passiveHealthForm, data);

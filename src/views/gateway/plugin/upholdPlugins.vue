@@ -51,6 +51,7 @@ export default {
     return {
       pluginColumn: { column: [] },
       pluginForm: { enabled: true },
+      pluginEntity: _.cloneDeep(this.plugin),
       slotColumns: [],
       tagsColumn: [],
       config: {},
@@ -66,7 +67,7 @@ export default {
     fields: { type: Object },
   },
   created() {
-    this.pluginForm = this.plugin["config"] || {};
+    this.pluginForm = this.pluginEntity["config"] || {};
     this.querySchema();
   },
   methods: {
@@ -80,7 +81,6 @@ export default {
           this.pluginColumn.column.push(_column);
         }
       });
-
       if (this.slotColumns.length > 0) {
         let _pluginColumns = { group: [], card: true };
         let defaultGroup = { label: "基本信息", column: [] };
@@ -100,15 +100,15 @@ export default {
                   slotColumn.slot + "_",
                   ""
                 );
-                console.log(
-                  "itemColumn",
-                  itemColumn,
-                  itemColumn.prop,
-                  ",slotColumn.slot",
-                  slotColumn.slot
-                );
-                if (this.plugin.config[slotColumn.slot]) {
-                  this.pluginForm[itemColumn.prop] = this.plugin.config[
+                // console.log(
+                //   "itemColumn",
+                //   itemColumn,
+                //   itemColumn.prop,
+                //   ",slotColumn.slot",
+                //   slotColumn.slot
+                // );
+                if (this.pluginEntity.config[slotColumn.slot]) {
+                  this.pluginForm[itemColumn.prop] = this.pluginEntity.config[
                     slotColumn.slot
                   ][childRealProp];
                 } else {
@@ -136,7 +136,7 @@ export default {
     createTagColumn(label) {
       let tagItem = {};
       tagItem.slot = label;
-      tagItem.tags = this.plugin.config[label] || [];
+      tagItem.tags = this.pluginEntity.config[label] || [];
       tagItem.column = label;
       tagItem.name = label;
       this.tagsColumn.push(tagItem);
@@ -150,7 +150,7 @@ export default {
         rules: [],
         value: null,
       };
-      _column.value = item["default"];
+      _column.value = this.plugin.config[label] || item["default"];
       let _fields = item["fields"];
       if (_fields) {
         _column.formslot = true;
@@ -182,7 +182,7 @@ export default {
         }
         //获取默认值
         if (item["default"] && !!!child) {
-          this.pluginForm[label] = item["default"];
+          this.pluginForm[label] = this.plugin.config[label] || item["default"];
         }
 
         _column.type = type;
@@ -194,6 +194,7 @@ export default {
           item["one_of"].forEach((label) => {
             _dics.push({ label: label, value: label });
           });
+
           _column.dicData = _dics;
         }
       }
@@ -222,15 +223,16 @@ export default {
       }
       console.log(_config);
       this.pluginForm = _config;
-      this.plugin.config = Object.assign(this.pluginForm, this.config);
+      this.pluginEntity.config = Object.assign(this.pluginForm, this.config);
       this.slotColumns.forEach((parentColumn) => {
         var _column = parentColumn.slot;
         parentColumn.option.column.forEach((childColumn) => {
-          var _columnConfig = this.plugin.config[childColumn.prop];
+          var _columnConfig = this.pluginEntity.config[childColumn.prop];
 
           if (_columnConfig === "" || _columnConfig) {
-            delete this.plugin.config[childColumn.prop];
-            let _parentConfig = this.plugin.config[parentColumn.slot] || {};
+            delete this.pluginEntity.config[childColumn.prop];
+            let _parentConfig =
+              this.pluginEntity.config[parentColumn.slot] || {};
             var childRealProp = childColumn.prop.replace(
               parentColumn.slot + "_",
               ""
@@ -238,30 +240,30 @@ export default {
 
             _parentConfig[childRealProp] =
               _columnConfig === "" ? null : _columnConfig;
-            this.plugin.config[parentColumn.slot] = _parentConfig;
+            this.pluginEntity.config[parentColumn.slot] = _parentConfig;
           }
         });
       });
       if (this.edit == "edit") {
-        pluginUpdate(this.plugin).then((res) => {
+        pluginUpdate(this.pluginEntity).then((res) => {
           let _data = res.data;
           if (_data.status != 0) {
             this.$errorInfo(_data.errmsg);
           } else {
-            this.plugin = _data.data;
+            this.pluginEntity = _data.data;
             this.$successInfo("修改成功");
             this.callback();
           }
           done();
         });
       } else if (this.edit == "add") {
-        this.plugin["enabled"] = true;
-        pluginSave(this.plugin).then((res) => {
+        this.pluginEntity["enabled"] = true;
+        pluginSave(this.pluginEntity).then((res) => {
           let _data = res.data;
           if (_data.status != 0) {
             this.$errorInfo(_data.errmsg);
           } else {
-            this.plugin = _data.data;
+            this.pluginEntity = _data.data;
             this.edit = true;
             this.$successInfo("新增成功");
             this.callback();
@@ -271,7 +273,7 @@ export default {
       }
     },
     callback() {
-      this.$emit("callback", {});
+      this.$emit("callback", this.pluginEntity);
     },
   },
 };

@@ -29,7 +29,7 @@
           <top-logs></top-logs>
         </div>
       </el-tooltip>-->
-      <el-tooltip
+      <!-- <el-tooltip
         effect="dark"
         content="锁屏"
         placement="bottom"
@@ -38,8 +38,8 @@
         <div class="top-bar__item">
           <top-lock></top-lock>
         </div>
-      </el-tooltip>
-      <el-tooltip
+      </el-tooltip> -->
+      <!-- <el-tooltip
         effect="dark"
         content="特色主题"
         placement="bottom"
@@ -48,7 +48,7 @@
         <div class="top-bar__item top-bar__item--show">
           <top-theme></top-theme>
         </div>
-      </el-tooltip>
+      </el-tooltip> -->
       <div class="top-bar__item">
         <span style="cursor: pointer">
           <font size="2"

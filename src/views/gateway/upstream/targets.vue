@@ -20,6 +20,9 @@
           :title="row.health"
         />
       </template>
+      <template slot-scope="{ row }" slot="created_at">
+        {{ new Date(row.created_at * 1000) | dateFormat }}
+      </template>
       <template slot-scope="scope" slot="menu">
         <el-button
           icon="el-icon-delete"

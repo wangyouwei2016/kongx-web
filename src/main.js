@@ -56,6 +56,11 @@ import 'zrender/lib/svg/svg'
 
 import 'echarts-liquidfill'
 
+import SuperFlow from 'vue-super-flow'
+import 'vue-super-flow/lib/index.css'
+
+Vue.use(SuperFlow)
+
 Vue.component('v-chart', ECharts)
 
 Vue.use(prototypeJs)

@@ -36,10 +36,7 @@
   </div>
 </template>
 <script>
-import {
-  activeHealthCheckOption,
-  passiveHealthCheckOption,
-} from "@/const/table/gatewayOption";
+import { activeHealthCheckOption } from "@/const/table/gatewayOption";
 import { upstreamUpdate, addTargets, targetDel } from "@/api/gateway/upstream";
 import ItemTags from "@/components/ItemTags.vue";
 export default {
@@ -47,8 +44,7 @@ export default {
   components: { ItemTags },
   data() {
     return {
-      activeHealthCheckOption: activeHealthCheckOption,
-      passiveHealthCheckOption: passiveHealthCheckOption,
+      activeHealthCheckOption: _.cloneDeep(activeHealthCheckOption),
       activeHealthForm: {
         http_statuses: ["200", "304"],
         fail_http_statuses: [
@@ -75,10 +71,11 @@ export default {
       required: false,
     },
     mode: { required: true },
+    type: {},
   },
   created() {
-    this.initform(this.upstream);
     this.initOptions();
+    this.initform(this.upstream);
   },
   methods: {
     initOptions() {
@@ -88,6 +85,9 @@ export default {
         });
         this.mode == "view" && (group["collapse"] = this.mode == "view");
       });
+      if (this.type && this.type == "drawer") {
+        this.activeHealthCheckOption["gutter"] = 0;
+      }
     },
     bindTags(data) {
       this.activeHealthForm = Object.assign(this.activeHealthForm, data);

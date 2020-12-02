@@ -1,15 +1,22 @@
 <template>
   <div>
     <basic-container>
-      <el-alert title="设置环境及激活" type="info" show-icon
-        >设置系统环境相关配置,请点击：
-        <router-link to="/operating/envs" v-if="permission.manage_env"
-          ><strong
-            ><el-link type="success" :underline="false"
-              >环境管理</el-link
-            ></strong
-          ></router-link
-        >，或联系管理员</el-alert
+      <el-alert type="info" show-icon
+        ><h3>
+          <span v-if="permission.manage_env"
+            >请激活Kong的管理连接，设置Kong管理连接请前往：
+            <router-link :to="{ path: routerUrl }"
+              ><strong
+                ><el-link
+                  type="success"
+                  :underline="false"
+                  @click.native="toConfig()"
+                  >配置中心</el-link
+                ></strong
+              ></router-link
+            ></span
+          ><span v-else>请激活Kong的管理连接，其它情况请联系平台管理员</span>
+        </h3></el-alert
       >
 
       <avue-crud
@@ -19,6 +26,9 @@
         ref="crud"
         @refresh-change="handlerefreshChange"
       >
+        <template slot-scope="{ row }" slot="create_at">
+          {{ new Date(row.create_at) | dateFormat }}
+        </template>
         <template slot="id" slot-scope="{ row }">
           <el-button
             v-if="activeClient.id != row.id"
@@ -100,6 +110,7 @@ export default {
       tableData: [], //表格的数据
       tableLoading: false,
       clientForm: {},
+      routerUrl: null,
       activeClient: { id: -1 },
       grade: {
         box: false,
@@ -111,12 +122,6 @@ export default {
     this.findActiveKongclient();
     this.handleList();
     this.initOptions();
-    this.$notify({
-      title: "提示",
-      type: "warning",
-      message: "请激活当前使用环境！！！",
-      offset: 100,
-    });
   },
   watch: {},
   mounted() {},
@@ -125,6 +130,12 @@ export default {
   },
   props: [],
   methods: {
+    toConfig() {
+      this.routerUrl = "/operating/envs";
+      setTimeout(() => {
+        this.$emit("callback", {});
+      }, 200);
+    },
     initOptions() {
       //if (!this.permission.client_update)
       this.tableOption["menu"] = false;

@@ -30,6 +30,7 @@
       append-to-body
     >
       <uphold-plugins
+        v-if="grade.pluginBox"
         :plugin="plugin"
         @callback="callback"
         :fields="fields"
@@ -228,8 +229,9 @@ export default {
         this.grade.pluginBox = true;
       });
     },
-    callback() {
-      this.$emit("callback", {});
+    callback(data) {
+      this.grade.pluginBox = false;
+      this.$emit("callback", data);
     },
   },
 };

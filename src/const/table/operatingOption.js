@@ -138,10 +138,8 @@ export const clientOption = {
     labelWidth: 120,
     simplePage: true,
     index: true,
-    border: true,
     menuBtn: true,
     addBtn: false,
-    simplePage: true,
     delBtn: false,
     editBtn: false,
     refreshBtn: false,
@@ -169,13 +167,7 @@ export const clientOption = {
             label: "Created_at",
             prop: "create_at",
             width: "180",
-            sortable: true,
-            type: "datetime",
-            format: "yyyy-MM-dd HH:mm:ss",
-            valueFormat: "yyyy-MM-dd HH:mm:ss",
-            formatter: (row, value, label, column) => {
-                return value;
-            }
+            slot: true,
         }
 
     ]

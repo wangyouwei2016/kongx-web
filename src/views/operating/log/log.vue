@@ -113,9 +113,6 @@
   position: relative;
   padding-bottom: 0px;
 }
-.el-card__body {
-  padding: 10px;
-}
 .el-divider--horizontal {
   display: block;
   height: 1px;

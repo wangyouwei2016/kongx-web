@@ -437,7 +437,7 @@ const COLUMNS_1_3_X = {
     "hmac-auth": hmacColumn
 }
 
-const COLUMNS_1_5_X = COLUMNS_1_3_X
+const COLUMNS_1_5_X = _.cloneDeep(COLUMNS_1_3_X)
 COLUMNS_1_5_X['Routes'] = _.assign(_.cloneDeep(routeColumn), {
     column: _.sortBy(_.concat(routeColumn.column, ([{
         label: "Path Handling", prop: "path_handling", row: true, span: 24, labelWidth: 120,

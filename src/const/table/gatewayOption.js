@@ -617,6 +617,7 @@ export const targetOption = {
             label: "创建日期",
             prop: "created_at",
             type: "date",
+            slot: true,
             format: "yyyy-MM-dd HH:mm:ss",
             valueFormat: "yyyy-MM-dd HH:mm:ss",
             formatter: (row, value, label, column) => {
