@@ -3,7 +3,7 @@
  */
 export default {
     title: "KONGX",
-    path: '',
+    path: '/kongx',
     version: '2.1.0',
     logo: "K",
     indexTitle: 'KONGX',
