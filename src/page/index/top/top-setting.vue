@@ -7,7 +7,7 @@
     ></div>
     <i class="el-icon-more setting__icon" @click="open"></i>
     <div class="setting__content" :class="{ 'setting__content--show': box }">
-      <div class="setting__header">版权信息(v1.3.x)</div>
+      <div class="setting__header">版权信息({{ website.version }})</div>
       <div class="setting__body setting__about">
         <p>支持Kong版本1.2.x到2.1.x</p>
       </div>
@@ -41,6 +41,7 @@ export default {
   },
   computed: {
     ...mapGetters(["isShade"]),
+    ...mapGetters(["website"]),
     ...mapState({
       showTag: (state) => state.common.showTag,
       showDebug: (state) => state.common.showDebug,
