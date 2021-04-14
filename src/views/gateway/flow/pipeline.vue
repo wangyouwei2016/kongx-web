@@ -206,14 +206,11 @@
 <script>
 import upholdService from "./upholdService";
 import upholdRoute from "./upholdRoute";
-import upholdUpstream from "./upholdUpstream";
-import upholdConsumer from "./upholdConsumer";
 import healthTarget from "./healthTarget";
 import listPlugin from "../plugin/listPlugin";
 import upholdPlugins from "../plugin/upholdPlugins";
 import activeHealthCheck from "../upstream/activeHealthCheck";
 import passiveHealthCheck from "../upstream/passiveHealthCheck";
-import targets from "./targets";
 import {} from "@/const/table/gatewayFlowOption";
 import {
   savePipeline,

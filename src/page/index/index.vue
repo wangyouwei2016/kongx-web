@@ -67,14 +67,11 @@
 import { mapGetters } from "vuex";
 import tags from "./tags";
 import top from "./top/";
-import shell from "./shell";
 import sidebar from "./sidebar/";
 import admin from "@/util/admin";
-import tools from "@/components/tools/";
 import { validatenull } from "@/util/validate";
 import { calcDate } from "@/util/date.js";
 import { getStore } from "@/util/store.js";
-import Shell from "./shell.vue";
 import topSetting from "./top/top-setting";
 import clientInfo from "../client-info";
 export default {
@@ -82,8 +79,6 @@ export default {
     top,
     tags,
     sidebar,
-    tools,
-    shell,
     clientInfo,
     topSetting,
   },

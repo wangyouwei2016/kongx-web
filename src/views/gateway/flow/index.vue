@@ -111,7 +111,6 @@ import {
 } from "@/api/gateway/pipeline";
 import pipeline from "./pipeline";
 import InnerBreadcrumb from "@/components/InnerBreadcrumb";
-import upholdPipeline from "./upholdPipeline";
 
 const PIPELINE = "pipeline";
 export default {
